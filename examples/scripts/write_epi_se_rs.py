@@ -1,6 +1,8 @@
 """
 This is an experimental high-performance EPI sequence which uses split gradients to overlap blips with the readout
 gradients combined with ramp-sampling.
+
+djfshkjfsehfliwjrepwjopjfopfpjowjopwejopwfejpo
 """
 
 import math
