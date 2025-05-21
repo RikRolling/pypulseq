@@ -87,6 +87,7 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_r
         rf_phase = divmod(rf_inc + rf_phase, 360.0)[1]
 
         seq.add_block(rf, gz)
+        #read through k-space defined
         phi = delta * (i - 1)
         seq.add_block(*pp.rotate(gx_pre, gz_reph, angle=phi, axis='z'))
         seq.add_block(pp.make_delay(delay_TE))
