@@ -17,6 +17,8 @@ import matplotlib as mpl
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.interpolate import PPoly
+#rk_addition
+from mpl_interactions import ioff, panhandler, zoom_factory
 
 from pypulseq import __version__, eps
 from pypulseq.calc_rf_center import calc_rf_center
@@ -916,6 +918,8 @@ class Sequence:
         if grad_disp not in valid_grad_units:
             raise ValueError('Unsupported gradient unit. Supported gradient units are: ' + str(valid_grad_units))
 
+        #rik additions, enable scroll with zoom
+        
         fig1, fig2 = plt.figure(), plt.figure()
         sp11 = fig1.add_subplot(311)
         sp12 = fig1.add_subplot(312, sharex=sp11)
@@ -1060,18 +1064,24 @@ class Sequence:
         # Setting display limits
         disp_range = t_factor * np.array([time_range[0], min(t0, time_range[1])])
         [x.set_xlim(disp_range) for x in [sp11, sp12, sp13, *fig2_subplots]]
-
+        
+        #Rik additions
+        
+    
+    
         # Grid on
         for sp in [sp11, sp12, sp13, *fig2_subplots]:
             sp.grid()
 
         fig1.tight_layout()
         fig2.tight_layout()
+        
         if save:
             fig1.savefig('seq_plot1.jpg')
             fig2.savefig('seq_plot2.jpg')
 
         if plot_now:
+        
             plt.show()
 
     def read(self, file_path: str, detect_rf_use: bool = False, remove_duplicates: bool = True) -> None:

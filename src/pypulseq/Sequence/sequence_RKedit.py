@@ -27,6 +27,8 @@ except ImportError:
 import matplotlib as mpl
 import numpy as np
 from matplotlib import pyplot as plt
+# importing package required for zoom-in scroller
+from mpl_interactions import ioff, panhandler, zoom_factory
 from scipy.interpolate import PPoly
 
 from pypulseq import __version__, eps
@@ -793,12 +795,12 @@ class Sequence:
             if np.abs(gradient_offset[j]) > eps:
                 gw[1, :] += gradient_offset[j]
 
-            gw[1][gw[1] == -0.0] = 0.0allowing for easier direct comparison
-    when altering parameters.
+            gw[1][gw[1] == -0.0] = 0.0 #allowing for easier direct comparison when altering parameters.
 
             gw_pp.append(PPoly(np.stack((np.diff(gw[1]) / np.diff(gw[0]), gw[1][:-1])), gw[0], extrapolate=True))
         return gw_pp
-src/pypulseq/Sequence/sequence.py
+
+    
     def install(self, target: Union[str, None] = None, clear_cache: bool = False, **kwargs: Any) -> None:
         """Install a sequence to a target scanner.
 
@@ -931,15 +933,17 @@ src/pypulseq/Sequence/sequence.py
         if grad_disp not in valid_grad_units:
             raise ValueError('Unsupported gradient unit. Supported gradient units are: ' + str(valid_grad_units))
 
-        fig1, fig2 = plt.figure(), plt.figure()
-        sp11 = fig1.add_subplot(311)
-        sp12 = fig1.add_subplot(312, sharex=sp11)
-        sp13 = fig1.add_subplot(313, sharex=sp11)
-        fig2_subplots = [
-            fig2.add_subplot(311, sharex=sp11),
-            fig2.add_subplot(312, sharex=sp11),
-            fig2.add_subplot(313, sharex=sp11),
-        ]
+        #rik additions, enable scroll with zoom
+        with plt.ioff():
+            fig1, fig2 = plt.figure(), plt.figure()
+            sp11 = fig1.add_subplot(311)
+            sp12 = fig1.add_subplot(312, sharex=sp11)
+            sp13 = fig1.add_subplot(313, sharex=sp11)
+            fig2_subplots = [
+                fig2.add_subplot(311, sharex=sp11),
+                fig2.add_subplot(312, sharex=sp11),
+                fig2.add_subplot(313, sharex=sp11),
+            ]
 
         t_factor_list = [1, 1e3, 1e6]
         t_factor = t_factor_list[valid_time_units.index(time_disp)]
@@ -1075,18 +1079,29 @@ src/pypulseq/Sequence/sequence.py
         # Setting display limits
         disp_range = t_factor * np.array([time_range[0], min(t0, time_range[1])])
         [x.set_xlim(disp_range) for x in [sp11, sp12, sp13, *fig2_subplots]]
-
+        
+        #Rik additions
+        zoom_factory(sp11)
+        zoom_factory(sp12)
+        zoom_factory(sp13)
+        for i in fig2_subplots:
+            disconnect_zoom = zoom_factory(i)
+        pan_handler_1 = panhandler(fig1)
+        pan_handler_2 = panhandler(fig2)
+    
         # Grid on
         for sp in [sp11, sp12, sp13, *fig2_subplots]:
             sp.grid()
 
         fig1.tight_layout()
         fig2.tight_layout()
+        
         if save:
             fig1.savefig('seq_plot1.jpg')
             fig2.savefig('seq_plot2.jpg')
 
         if plot_now:
+        
             plt.show()
 
     def read(self, file_path: str, detect_rf_use: bool = False, remove_duplicates: bool = True) -> None:
