@@ -1,5 +1,7 @@
 """
 Demo low-performance EPI sequence without ramp-sampling.
+
+Editting parameters to obtain TR = 15ms, single slice acquisition
 """
 
 import numpy as np
@@ -13,9 +15,9 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_p
     # ======
     # Define FOV and resolution
     fov = 220e-3
-    Nx = 24
-    Ny = 24
-    slice_thickness = 3e-1  # Slice thickness
+    Nx = 64
+    Ny = 64
+    slice_thickness = 3e-3  # Slice thickness
     n_slices = 1
 
     # Set system limits

@@ -1,3 +1,14 @@
+#RK edit of existing sequence.py code
+
+"""
+AIM:
+
+To add a scroller to the plots produced with the pulse sequence code.
+
+Our test monkey will be write_epi.py
+
+"""
+
 import itertools
 import math
 from collections import OrderedDict
@@ -16,9 +27,9 @@ except ImportError:
 import matplotlib as mpl
 import numpy as np
 from matplotlib import pyplot as plt
-from scipy.interpolate import PPoly
-#rk_addition
+# importing package required for zoom-in scroller
 from mpl_interactions import ioff, panhandler, zoom_factory
+from scipy.interpolate import PPoly
 
 from pypulseq import __version__, eps
 from pypulseq.calc_rf_center import calc_rf_center
@@ -111,8 +122,6 @@ class Sequence:
         s += '\ngrad_raster_time: ' + str(self.grad_raster_time)
         s += '\nblock_events: ' + str(len(self.block_events))
         return s
-
-    def adc_times(self, time_range: Union[List[float], None] = None) -> Tuple[np.ndarray, np.ndarray]:
         """
         Return time points of ADC sampling points.
 
@@ -786,11 +795,12 @@ class Sequence:
             if np.abs(gradient_offset[j]) > eps:
                 gw[1, :] += gradient_offset[j]
 
-            gw[1][gw[1] == -0.0] = 0.0
+            gw[1][gw[1] == -0.0] = 0.0 #allowing for easier direct comparison when altering parameters.
 
             gw_pp.append(PPoly(np.stack((np.diff(gw[1]) / np.diff(gw[0]), gw[1][:-1])), gw[0], extrapolate=True))
         return gw_pp
 
+    
     def install(self, target: Union[str, None] = None, clear_cache: bool = False, **kwargs: Any) -> None:
         """Install a sequence to a target scanner.
 
@@ -857,7 +867,8 @@ class Sequence:
         all_grad_events = np.array(list(self.block_events.values()))
         all_grad_events = all_grad_events[:, 2:5]
 
-        selected_events = np.unique(all_grad_events[:, channel_num])
+        selected_events = np.unique(all_grad_events[:, channel_allowing for easier direct comparison
+    when altering parameters.num])
         selected_events = selected_events[selected_events != 0]
         other_events = np.unique(all_grad_events[:, other_channels])
         if len(np.intersect1d(selected_events, other_events)) > 0:
@@ -869,7 +880,11 @@ class Sequence:
                 # Need to update first and last fields
                 self.grad_library.data[selected_events[i]][3] *= modifier
                 self.grad_library.data[selected_events[i]][4] *= modifier
-
+    """
+    RikRolling addition: 
+    Want to add scroller to increase resolution of graphs allowing for easier direct comparison
+    when altering parameters.
+    """
     def plot(
         self,
         label: str = str(),
@@ -919,16 +934,16 @@ class Sequence:
             raise ValueError('Unsupported gradient unit. Supported gradient units are: ' + str(valid_grad_units))
 
         #rik additions, enable scroll with zoom
-        
-        fig1, fig2 = plt.figure(), plt.figure()
-        sp11 = fig1.add_subplot(311)
-        sp12 = fig1.add_subplot(312, sharex=sp11)
-        sp13 = fig1.add_subplot(313, sharex=sp11)
-        fig2_subplots = [
-            fig2.add_subplot(311, sharex=sp11),
-            fig2.add_subplot(312, sharex=sp11),
-            fig2.add_subplot(313, sharex=sp11),
-        ]
+        with plt.ioff():
+            fig1, fig2 = plt.figure(), plt.figure()
+            sp11 = fig1.add_subplot(311)
+            sp12 = fig1.add_subplot(312, sharex=sp11)
+            sp13 = fig1.add_subplot(313, sharex=sp11)
+            fig2_subplots = [
+                fig2.add_subplot(311, sharex=sp11),
+                fig2.add_subplot(312, sharex=sp11),
+                fig2.add_subplot(313, sharex=sp11),
+            ]
 
         t_factor_list = [1, 1e3, 1e6]
         t_factor = t_factor_list[valid_time_units.index(time_disp)]
@@ -1066,8 +1081,13 @@ class Sequence:
         [x.set_xlim(disp_range) for x in [sp11, sp12, sp13, *fig2_subplots]]
         
         #Rik additions
-        
-    
+        zoom_factory(sp11)
+        zoom_factory(sp12)
+        zoom_factory(sp13)
+        for i in fig2_subplots:
+            disconnect_zoom = zoom_factory(i)
+        pan_handler_1 = panhandler(fig1)
+        pan_handler_2 = panhandler(fig2)
     
         # Grid on
         for sp in [sp11, sp12, sp13, *fig2_subplots]:

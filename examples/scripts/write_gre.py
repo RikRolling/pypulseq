@@ -98,8 +98,8 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_p
         )
         seq.add_block(gx_pre, gy_pre, gz_reph)
         seq.add_block(pp.make_delay(delay_TE))
-        seq.add_block(gx, adc)
-        gy_pre.amplitude = -gy_pre.amplitude
+        seq.add_block(gx, adc) #reads one line of k space
+        gy_pre.amplitude = -gy_pre.amplitude # reverse polarity of phase encode
         seq.add_block(pp.make_delay(delay_TR), gx_spoil, gy_pre, gz_spoil)
 
     # Check whether the timing of the sequence is correct
@@ -137,4 +137,4 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_p
 
 
 if __name__ == '__main__':
-    main(plot=False, write_seq=True)
+    main(plot=True, write_seq=True)
