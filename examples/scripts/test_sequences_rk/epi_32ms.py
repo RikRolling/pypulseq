@@ -1,9 +1,14 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Demo low-performance EPI sequence without ramp-sampling.
+Simple EPI Sequence
 
-Editting parameters to obtain TR = 15ms, single slice acquisition
+System limits based on SIEMENS 3T PRISMA
 
-Test space to make changes and trial ideas
+TR = 32ms
+Nx, Ny = 64
+
+@author: Rik Khot
 """
 
 import numpy as np
