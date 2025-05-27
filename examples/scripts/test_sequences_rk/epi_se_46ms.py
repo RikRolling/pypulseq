@@ -22,7 +22,7 @@ import numpy as np
 import pypulseq as pp
 
 
-def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_se_pypulseq.seq'):
+def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_se_46ms_pypulseq.seq'):
     # ======
     # SETUP
     # ======
