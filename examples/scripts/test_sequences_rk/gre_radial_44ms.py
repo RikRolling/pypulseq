@@ -11,18 +11,18 @@ import numpy as np
 import pypulseq as pp
 
 
-def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_radial_pypulseq.seq'):
+def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_radial_44ms_pypulseq.seq'):
     # ======
     # SETUP
     # ======
      # FOV for SIEMENS prisma = 125 (3D), 250 (2D)
     fov = 250 # initial val =260e-3
-    Nx = 64  # Define FOV and resolution
+    Nx = 64 # Define FOV and resolution
     alpha = 90 #10 = initial value # Flip angle
     slice_thickness = 1e-3 #initial val = 3e-3  # Slice thickness
     TE = 5e-3 #8e-3 = initial val  # Echo time
     TR = 7.8e-3 #20e-3 = initial val  # Repetition time
-    Nr = 4 #initial val = 60  # Number of radial spokes
+    Nr = 20 #initial val = 60  # Number of radial spokes
     N_dummy = 0  #20 = initial val # Number of dummy scans
     delta = np.pi / Nr  # Angular increment
 
