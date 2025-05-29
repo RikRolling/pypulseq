@@ -3,7 +3,7 @@ Demo radial gradient recalled echo pulse sequence
 
 Editting parameters to obtain TR = 15ms, single slice acquisition
 
-Test space to make changes and trial ideas
+Total time = 185ms
 """
 
 import numpy as np
@@ -11,7 +11,7 @@ import numpy as np
 import pypulseq as pp
 
 
-def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_radial_44ms_pypulseq.seq'):
+def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_radial_185ms_pypulseq.seq'):
     # ======
     # SETUP
     # ======
@@ -22,7 +22,7 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_r
     slice_thickness = 1e-3 #initial val = 3e-3  # Slice thickness
     TE = 5e-3 #8e-3 = initial val  # Echo time
     TR = 7.8e-3 #20e-3 = initial val  # Repetition time
-    Nr = 4 #initial val = 60  # Number of radial spokes
+    Nr = 20 #initial val = 60  # Number of radial spokes
     N_dummy = 0  #20 = initial val # Number of dummy scans
     delta = np.pi / Nr  # Angular increment
 

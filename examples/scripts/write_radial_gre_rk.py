@@ -1,5 +1,5 @@
 """
-Demo radial gradient recalled echo pulse sequence
+Demo  radial gradient recalled echo pulse sequence
 
 Editting parameters to obtain TR = 15ms, single slice acquisition
 
