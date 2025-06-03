@@ -1,15 +1,9 @@
 """
-Demo golden angle radial gradient recalled echo pulse sequence
+Demo radial gradient recalled echo pulse sequence
 
-Editting parameters to obtain TR <= 15ms, single slice acquisition
+Editting parameters to obtain TR = 15ms, single slice acquisition
 
-Test space to make changes and trial ideas
-
-Half spoke, delta ~ 137.51 degrees, Gx area = Nx/2 * a
-
-Full Spoke, delta ~ 111.25 degrees, Gx area = Nx * a
-
-where a is some other variables.
+Total time = 185ms
 """
 
 import numpy as np
@@ -17,20 +11,20 @@ import numpy as np
 import pypulseq as pp
 
 
-def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_radial_golden_half_.seq'):
+def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_radial_185ms_pypulseq.seq'):
     # ======
     # SETUP
     # ======
      # FOV for SIEMENS prisma = 125 (3D), 250 (2D)
-    fov = 250e-3 # initial val =260e-3
-    Nx = 128  # Define FOV and resolution
+    fov = 250 # initial val =260e-3
+    Nx = 64 # Define FOV and resolution
     alpha = 90 #10 = initial value # Flip angle
-    slice_thickness = 3e-3 #initial val = 3e-3  # Slice thickness
+    slice_thickness = 1e-3 #initial val = 3e-3  # Slice thickness
     TE = 5e-3 #8e-3 = initial val  # Echo time
     TR = 7.8e-3 #20e-3 = initial val  # Repetition time
-    Nr = 5 #initial val = 60  # Number of radial spokes
+    Nr = 20 #initial val = 60  # Number of radial spokes
     N_dummy = 0  #20 = initial val # Number of dummy scans
-    delta = 137.51*(np.pi/360) # Angular increment
+    delta = np.pi / Nr  # Angular increment
 
     rf_spoiling_inc = 117  # RF spoiling increment
 
@@ -64,14 +58,13 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_r
     )
 
     # Define other gradients and ADC events
-    #Trial Nx/2 for half spoke 
     deltak = 1 / fov
-    gx = pp.make_trapezoid(channel='x', flat_area=Nx/2 * deltak, flat_time=6.4e-3 / 5, system=system)
+    gx = pp.make_trapezoid(channel='x', flat_area=Nx * deltak, flat_time=6.4e-3 / 5, system=system)
     adc = pp.make_adc(num_samples=Nx, duration=gx.flat_time, delay=gx.rise_time, system=system)
     gx_pre = pp.make_trapezoid(channel='x', area=-gx.area / 2 - deltak / 2, duration=2e-3, system=system)
     gz_reph = pp.make_trapezoid(channel='z', area=-gz.area / 2, duration=2e-3, system=system)
     # Gradient spoiling
-    gx_spoil = pp.make_trapezoid(channel='x', area=0.5 * Nx/2 * deltak, system=system)
+    gx_spoil = pp.make_trapezoid(channel='x', area=0.5 * Nx * deltak, system=system)
     gz_spoil = pp.make_trapezoid(channel='z', area=4 / slice_thickness, system=system)
 
     # Calculate timing
