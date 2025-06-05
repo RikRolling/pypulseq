@@ -16,6 +16,8 @@ import numpy as np
 
 import pypulseq as pp
 
+import pandas as pd
+
 from pypulseq.SAR.SAR_calc import _SAR_from_seq as SAR
 
 
@@ -45,7 +47,7 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
         # Currently do not have access to these values (27/05/25)
         rf_ringdown_time=20e-6,
         rf_dead_time=100e-6,
-        adc_dead_time=10e-6,
+        adc_dead_time=10e-6
     )
 
     seq = pp.Sequence(system)  # Create a new sequence object
@@ -123,11 +125,22 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
         print('Timing check failed! Error listing follows:')
         print(error_report)
 
+    # ========
+    # SAR CHECKER
+    # ========
     if sar:
+    #values based on average man
         body_mass = np.array([84.5])
         head_mass = np.array([5])
         sar_values = SAR(seq, body_mass, head_mass)
-        print(sar_values)
+        sar_values_array = np.column_stack((sar_values[0], sar_values[1], sar_values[2]))
+
+        headers = ["Body mass SAR", "Head mass SAR", "time"]
+        sar_values_table = pd.DataFrame(sar_values_array, columns=headers)
+        sar_values_table.to_csv('SAR.csv', index=False)
+
+        
+        #np.savetxt("SAR.csv",sar_values_array, delimiter=',' )
     
    
     # ======
@@ -145,12 +158,6 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
         seq.write(seq_filename)
 
     return seq
-    # ========
-    # SAR CHECKER
-    # ========
-    
-        
- 
 
 
 

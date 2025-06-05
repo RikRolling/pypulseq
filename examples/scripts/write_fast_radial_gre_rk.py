@@ -96,7 +96,7 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_r
     rf_phase = 0
     rf_inc = 0
 
-    #duration, num_blocks, event_count = seq.duration()
+    duration, num_blocks, event_count = iter(seq.duration())
     #seq_duration_tuple = tuple(seq.duration)
 
     # ======
@@ -117,7 +117,7 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_r
         if TE<=0:
             
 
-            TE = seq.duration + adc.delay + adc.dwell*(adc.num_samples/2+0.5)
+            TE = duration + adc.delay + adc.dwell*(adc.num_samples/2+0.5)
        
         if i > 0:
             seq.add_block(*pp.rotate(gx, adc, gz_spoil, angle=phi, axis='z'))
@@ -126,7 +126,7 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_r
             seq.add_block(*pp.rotate(gx, gz_spoil, angle=phi, axis='z'))
         
         if TR<=0:
-            TR=seq.duration
+            TR=duration
       
 
     ok, error_report = seq.check_timing()
