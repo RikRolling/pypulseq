@@ -137,6 +137,8 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
 
         headers = ["Body mass SAR", "Head mass SAR", "time"]
         sar_values_table = pd.DataFrame(sar_values_array, columns=headers)
+        if sar_values_table[]
+
         sar_values_table.to_csv('SAR.csv', index=False)
 
         
