@@ -16,19 +16,21 @@ import numpy as np
 
 import pypulseq as pp
 
+from pypulseq.SAR.SAR_calc import _SAR_from_seq as SAR
 
-def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_radial_golden_half_.seq'):
+
+def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_filename: str = 'gre_radial_golden_half_.seq'):
     # ======
     # SETUP
     # ======
      # FOV for SIEMENS prisma = 125 (3D), 250 (2D)
     fov = 250e-3 # initial val =260e-3
-    Nx = 128  # Define FOV and resolution
+    Nx = 64  # Define FOV and resolution
     alpha = 90 #10 = initial value # Flip angle
-    slice_thickness = 3e-3 #initial val = 3e-3  # Slice thickness
+    slice_thickness = 1e-3 #initial val = 3e-3  # Slice thickness
     TE = 5e-3 #8e-3 = initial val  # Echo time
     TR = 7.8e-3 #20e-3 = initial val  # Repetition time
-    Nr = 5 #initial val = 60  # Number of radial spokes
+    Nr = 13 #initial val = 60  # Number of radial spokes
     N_dummy = 0  #20 = initial val # Number of dummy scans
     delta = 137.51*(np.pi/360) # Angular increment
 
@@ -121,6 +123,13 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_r
         print('Timing check failed! Error listing follows:')
         print(error_report)
 
+    if sar:
+        body_mass = np.array([84.5])
+        head_mass = np.array([5])
+        sar_values = SAR(seq, body_mass, head_mass)
+        print(sar_values)
+    
+   
     # ======
     # VISUALIZATION
     # ======
@@ -136,7 +145,14 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_r
         seq.write(seq_filename)
 
     return seq
+    # ========
+    # SAR CHECKER
+    # ========
+    
+        
+ 
+
 
 
 if __name__ == '__main__':
-    main(plot=True, write_seq=True)
+    main(plot=False, write_seq=False, sar=True)
