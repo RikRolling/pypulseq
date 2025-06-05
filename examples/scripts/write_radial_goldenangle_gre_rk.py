@@ -137,9 +137,12 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
 
         headers = ["Body mass SAR", "Head mass SAR", "time"]
         sar_values_table = pd.DataFrame(sar_values_array, columns=headers)
-        if sar_values_table[]
-
         sar_values_table.to_csv('SAR.csv', index=False)
+        for i in sar_values_table.iloc[:, 1]:
+            if (0 < i <= 3.2):
+                print("SAR value acceptable")
+            else:
+                print("SAR value NOT acceptable")
 
         
         #np.savetxt("SAR.csv",sar_values_array, delimiter=',' )
