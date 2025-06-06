@@ -20,20 +20,22 @@ import pandas as pd
 
 from pypulseq.SAR.SAR_calc import _SAR_from_seq as SAR
 
+from pypulseq.SAR.SAR_calc import _load_Q 
 
-def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_filename: str = 'gre_radial_golden_half_.seq'):
+
+def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_filename: str = 'gre_radial_golden_half_1070_test.seq'):
     # ======
     # SETUP
     # ======
      # FOV for SIEMENS prisma = 125 (3D), 250 (2D)
     fov = 250e-3 # initial val =260e-3
-    Nx = 64  # Define FOV and resolution
+    Nx = 128  # Define FOV and resolution
     alpha = 90 #10 = initial value # Flip angle
     slice_thickness = 1e-3 #initial val = 3e-3  # Slice thickness
     TE = 5e-3 #8e-3 = initial val  # Echo time
     TR = 7.8e-3 #20e-3 = initial val  # Repetition time
-    Nr = 13 #initial val = 60  # Number of radial spokes
-    N_dummy = 0  #20 = initial val # Number of dummy scans
+    Nr = 100 #initial val = 60  # Number of radial spokes
+    N_dummy = 20  #20 = initial val # Number of dummy scans
     delta = 137.51*(np.pi/360) # Angular increment
 
     rf_spoiling_inc = 117  # RF spoiling increment
@@ -128,22 +130,29 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
     # ========
     # SAR CHECKER
     # ========
+
+    # USE OF SAR IS INCORRECT!!! wE REQUIRE Q MATRIX
     if sar:
-    #values based on average man
-        body_mass = np.array([84.5])
-        head_mass = np.array([5])
-        sar_values = SAR(seq, body_mass, head_mass)
+   
+        Qtmf, Qhmf = _load_Q()
+        sar_values = SAR(seq, Qtmf, Qhmf)
         sar_values_array = np.column_stack((sar_values[0], sar_values[1], sar_values[2]))
 
         headers = ["Body mass SAR", "Head mass SAR", "time"]
         sar_values_table = pd.DataFrame(sar_values_array, columns=headers)
         sar_values_table.to_csv('SAR.csv', index=False)
+        #Validation for head mass SAR
         for i in sar_values_table.iloc[:, 1]:
             if (0 < i <= 3.2):
                 print("SAR value acceptable")
+            elif (i == 0):
+                print("SAR = 0")
             else:
                 print("SAR value NOT acceptable")
-
+        #Validation for full body mass SAR
+        for j in sar_values_table.iloc[:, 0]:
+            if (j > 2):
+                print("SAR Body value NOT acceptable")
         
         #np.savetxt("SAR.csv",sar_values_array, delimiter=',' )
     
@@ -167,4 +176,4 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
 
 
 if __name__ == '__main__':
-    main(plot=False, write_seq=False, sar=True)
+    main(plot=True, write_seq=True, sar=True)
