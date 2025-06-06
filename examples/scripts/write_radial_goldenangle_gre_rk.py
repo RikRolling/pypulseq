@@ -23,7 +23,7 @@ from pypulseq.SAR.SAR_calc import _SAR_from_seq as SAR
 from pypulseq.SAR.SAR_calc import _load_Q 
 
 
-def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_filename: str = 'gre_radial_golden_half_1070_test.seq'):
+def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_filename: str = 'gre_radial_golden_full_1071ms.seq'):
     # ======
     # SETUP
     # ======
@@ -36,7 +36,7 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
     TR = 7.8e-3 #20e-3 = initial val  # Repetition time
     Nr = 100 #initial val = 60  # Number of radial spokes
     N_dummy = 20  #20 = initial val # Number of dummy scans
-    delta = 137.51*(np.pi/360) # Angular increment
+    delta = 111.25*(np.pi/360) # Angular increment
 
     rf_spoiling_inc = 117  # RF spoiling increment
 
@@ -72,12 +72,12 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
     # Define other gradients and ADC events
     #Trial Nx/2 for half spoke 
     deltak = 1 / fov
-    gx = pp.make_trapezoid(channel='x', flat_area=Nx/2 * deltak, flat_time=6.4e-3 / 5, system=system)
+    gx = pp.make_trapezoid(channel='x', flat_area=Nx * deltak, flat_time=6.4e-3 / 5, system=system)
     adc = pp.make_adc(num_samples=Nx, duration=gx.flat_time, delay=gx.rise_time, system=system)
     gx_pre = pp.make_trapezoid(channel='x', area=-gx.area / 2 - deltak / 2, duration=2e-3, system=system)
     gz_reph = pp.make_trapezoid(channel='z', area=-gz.area / 2, duration=2e-3, system=system)
     # Gradient spoiling
-    gx_spoil = pp.make_trapezoid(channel='x', area=0.5 * Nx/2 * deltak, system=system)
+    gx_spoil = pp.make_trapezoid(channel='x', area=0.5 * Nx * deltak, system=system)
     gz_spoil = pp.make_trapezoid(channel='z', area=4 / slice_thickness, system=system)
 
     # Calculate timing
@@ -105,7 +105,6 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
     for i in range(-N_dummy, Nr + 1):
         rf.phase_offset = rf_phase / 180 * np.pi
         adc.phase_offset = rf_phase / 180 * np.pi
-
         rf_inc = divmod(rf_inc + rf_spoiling_inc, 360.0)[1]
         rf_phase = divmod(rf_inc + rf_phase, 360.0)[1]
 
@@ -141,19 +140,21 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
         headers = ["Body mass SAR", "Head mass SAR", "time"]
         sar_values_table = pd.DataFrame(sar_values_array, columns=headers)
         sar_values_table.to_csv('SAR.csv', index=False)
-        #Validation for head mass SAR
+        
+        #SAR checker - print statement will only been shown if SAR is violated for either head or body
+        violation_1 = False
+        violation_2 = False
         for i in sar_values_table.iloc[:, 1]:
-            if (0 < i <= 3.2):
-                print("SAR value acceptable")
-            elif (i == 0):
-                print("SAR = 0")
-            else:
-                print("SAR value NOT acceptable")
+            if (i >= 3.2):
+                print("SAR head value NOT acceptable")
+                violation_1 = True
+                break
         #Validation for full body mass SAR
         for j in sar_values_table.iloc[:, 0]:
             if (j > 2):
                 print("SAR Body value NOT acceptable")
-        
+                violation_2 = False
+                break
         #np.savetxt("SAR.csv",sar_values_array, delimiter=',' )
     
    
