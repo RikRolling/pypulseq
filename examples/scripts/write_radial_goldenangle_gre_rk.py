@@ -155,7 +155,7 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
                 print("SAR Body value NOT acceptable")
                 violation_2 = False
                 break
-        #np.savetxt("SAR.csv",sar_values_array, delimiter=',' )
+        
     
    
     # ======
