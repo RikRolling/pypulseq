@@ -93,10 +93,17 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
     tos_calculation = 10 #time oversampling
     grad_oversampling = True
     c_max = k_radius*k_samples*tos_calculation
+    r = np.array()
+    a = np.array()
 
     #ka(k_radius*k_samples+1)= 1j # I'm confused
     for c in range(0, c_max):
-        
+        r_val = deltak*c/k_samples/tos_calculation
+        r = np.append(r, r_val)
+
+
+
+
     
     
     
