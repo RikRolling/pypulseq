@@ -92,9 +92,13 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
     k_samples = np.ceil(2*np.pi*k_radius)*adc_oversampling #no. of samples on outest circle of spiral
     tos_calculation = 10 #time oversampling
     grad_oversampling = True
+    c_max = k_radius*k_samples*tos_calculation
 
     #ka(k_radius*k_samples+1)= 1j # I'm confused
-
+    for c in range(0, c_max):
+        
+    
+    
     
 
 
