@@ -122,7 +122,11 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
     # Limit analysis
 
     safety_margin = 0.99
-    dt_gabs = abs
+
+    dt_gabs = abs(ga[1,:] + 1j*ga[2,:])/(system.max_grad*safety_margin)*dt #absolutely have no clue what this is and whether it will work
+    dt_sabs = np.sqrt(abs(sa[1,:]+1j*sa[2,:]))/(system.max_slew*safety_margin)*dt
+
+    dt_opt=np.max([dt_gabs, dt_sabs])
 
     
 
