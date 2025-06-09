@@ -95,60 +95,39 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
     c_max = k_radius*k_samples*tos_calculation
     r = np.array()
     a = np.array()
+    ka = np.array()
 
-    #ka(k_radius*k_samples+1)= 1j # I'm confused
     for c in range(0, c_max):
         r_val = deltak*c/k_samples/tos_calculation
         r = np.append(r, r_val)
 
+        a_val = (c % (k_samples*tos_calculation))*2*np.pi/k_samples/tos_calculation
+        a = np.append(a, a_val)
+
+        ka_val = r*np.exp(1j*a)
+        ka = np.append(ka, ka_val)
+
+    ka = [ka.real, ka.imag] #kx and ky matrix
 
 
+    # Calc gradients and slew rates
 
-    
-    
-    
+    dt = system.grad_raster_time/tos_calculation
+    ga, sa = pp.traj_to_grad(
+        k=ka,
+        raster_time=dt,
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    gx = pp.make_trapezoid(channel='x', flat_area=Nx * deltak, flat_time=6.4e-3 / 5, system=system)
-    adc = pp.make_adc(num_samples=Nx, duration=gx.flat_time, delay=gx.rise_time, system=system)
-    gx_pre = pp.make_trapezoid(channel='x', area=-gx.area / 2 - deltak / 2, duration=2e-3, system=system)
-    gz_reph = pp.make_trapezoid(channel='z', area=-gz.area / 2, duration=2e-3, system=system)
-    # Gradient spoiling
-    gx_spoil = pp.make_trapezoid(channel='x', area=0.5 * Nx * deltak, system=system)
-    gz_spoil = pp.make_trapezoid(channel='z', area=4 / slice_thickness, system=system)
-
-    # Calculate timing
-    delay_TE = (
-        np.ceil(
-            (TE - pp.calc_duration(gx_pre) - gz.fall_time - gz.flat_time / 2 - pp.calc_duration(gx) / 2)
-            / seq.grad_raster_time
-        )
-        * seq.grad_raster_time
     )
-    delay_TR = (
-        np.ceil(
-            (TR - pp.calc_duration(gx_pre) - pp.calc_duration(gz) - pp.calc_duration(gx) - delay_TE)
-            / seq.grad_raster_time
-        )
-        * seq.grad_raster_time
-    )
-    assert np.all(delay_TR) > pp.calc_duration(gx_spoil, gz_spoil)
-    rf_phase = 0
-    rf_inc = 0
+
+    # Limit analysis
+
+    safety_margin = 0.99
+    dt_gabs = abs
+
+    
+
+    #
+    
 
     # ======
     # CONSTRUCT SEQUENCE
