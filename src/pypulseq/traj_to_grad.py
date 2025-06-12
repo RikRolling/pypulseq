@@ -15,6 +15,8 @@ def traj_to_grad(k: np.ndarray, raster_time: Union[float, None] = None) -> Tuple
         K-space trajectory to be converted into gradient waveform.
     raster_time : float, default=Opts().grad_raster_time
         Gradient raster time.
+    #RIK ADDITION
+    
 
     Returns
     -------
