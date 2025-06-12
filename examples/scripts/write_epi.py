@@ -7,22 +7,22 @@ import numpy as np
 import pypulseq as pp
 
 
-def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_pypulseq.seq'):
+def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_orig.seq'):
     # ======
     # SETUP
     # ======
     # Define FOV and resolution
-    fov = 220e-3
-    Nx = 24
-    Ny = 24
-    slice_thickness = 3e-1  # Slice thickness
-    n_slices = 1
+    fov = 250e-3
+    Nx = 64
+    Ny = 64
+    slice_thickness = 3e-3  # Slice thickness
+    n_slices = 3
 
     # Set system limits
     system = pp.Opts(
-        max_grad=32,
+        max_grad=139,
         grad_unit='mT/m',
-        max_slew=130,
+        max_slew=346,
         slew_unit='T/m/s',
         rf_ringdown_time=30e-6,
         rf_dead_time=100e-6,
