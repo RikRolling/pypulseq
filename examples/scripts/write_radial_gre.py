@@ -3,11 +3,11 @@ import numpy as np
 import pypulseq as pp
 
 
-def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_radial_pypulseq.seq'):
+def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_radial_orig.seq'):
     # ======
     # SETUP
     # ======
-    fov = 260e-3
+    fov = 250e-3
     Nx = 64  # Define FOV and resolution
     alpha = 10  # Flip angle
     slice_thickness = 3e-3  # Slice thickness
@@ -29,7 +29,6 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_r
         rf_dead_time=100e-6,
         adc_dead_time=10e-6,
     )
-
     seq = pp.Sequence(system)  # Create a new sequence object
 
     # ======
@@ -37,6 +36,7 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_r
     # ======
     # Create alpha-degree slice selection pulse and gradient
     rf, gz, _ = pp.make_sinc_pulse(
+
         apodization=0.5,
         duration=4e-3,
         flip_angle=alpha * np.pi / 180,
@@ -87,7 +87,6 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_r
         rf_phase = divmod(rf_inc + rf_phase, 360.0)[1]
 
         seq.add_block(rf, gz)
-        #read through k-space defined here
         phi = delta * (i - 1)
         seq.add_block(*pp.rotate(gx_pre, gz_reph, angle=phi, axis='z'))
         seq.add_block(pp.make_delay(delay_TE))
