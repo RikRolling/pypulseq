@@ -11,7 +11,7 @@ import numpy as np
 import pypulseq as pp
 
 
-def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_undersampled_pypulseq.seq'):
+def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_undersampled_lowsysvals_longtime2.seq'):
     # ======
     # SETUP
     # ======
@@ -23,17 +23,17 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_u
     slice_thickness = 3e-3  # Slice thickness
     n_slices = 1
     #added undersampling factor
-    undersampling_factor = 2
+    undersampling_factor = 0.5
 
     # Set 3T Siemens PRISMA system limits
     system = pp.Opts(
-        max_grad=139,
+        max_grad=75,
         grad_unit='mT/m',
-        max_slew=346,
+        max_slew=280,
         slew_unit='T/m/s',
         # Currently do not have access to these values (23/05/25)
-        rf_ringdown_time=30e-6,
-        rf_dead_time=100e-6,
+        rf_ringdown_time=30e-4,
+        rf_dead_time=100e-4,
     )
 
     seq = pp.Sequence(system)  # Create a new sequence object
@@ -57,8 +57,10 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_u
     delta_k = 1 / fov
     k_width = Nx * delta_k
     dwell_time = 4e-6
-    readout_time = Nx * dwell_time
+    #added undersampling factor
+    readout_time = undersampling_factor*Nx * dwell_time
     flat_time = np.ceil(readout_time * 1e5) * 1e-5  # round-up to the gradient raster
+    #added
     gx = pp.make_trapezoid(
         channel='x',
         system=system,
@@ -66,7 +68,7 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_u
         flat_time=flat_time,
     )
     adc = pp.make_adc(
-        num_samples=Nx,
+        num_samples=Nx*undersampling_factor,
         duration=readout_time,
         delay=gx.rise_time + flat_time / 2 - (readout_time - dwell_time) / 2,
     )
@@ -79,7 +81,12 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_u
 
     # Phase blip in the shortest possible time
     dur = np.ceil(2 * np.sqrt(delta_k / system.max_slew) / 10e-6) * 10e-6
-    gy = pp.make_trapezoid(channel='y', system=system, area=delta_k/undersampling_factor, duration=dur)
+    dur_u = np.ceil(2*2 * np.sqrt(delta_k / system.max_slew) / 10e-6) * 10e-6
+    gy = pp.make_trapezoid(channel='y', system=system, area=delta_k, duration=dur)
+    gy_amplitude_undersample = 2*gy.amplitude
+    gy_undersample = pp.make_trapezoid(channel='y', system=system, amplitude=gy_amplitude_undersample, duration=dur)
+    N_u = int(Ny/2)
+    
 
     # ======
     # CONSTRUCT SEQUENCE
@@ -91,7 +98,7 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_u
         seq.add_block(gx_pre, gy_pre, gz_reph)
         for _ in range(Ny):
             seq.add_block(gx, adc)  # Read one line of k-space
-            seq.add_block(gy)  # Phase blip
+            seq.add_block(gy_undersample)  # Phase blip
             gx.amplitude = -gx.amplitude  # Reverse polarity of read gradient
 
     ok, error_report = seq.check_timing()

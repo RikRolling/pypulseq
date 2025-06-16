@@ -11,7 +11,7 @@ import numpy as np
 import pypulseq as pp
 
 
-def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_pypulseq.seq'):
+def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_32ms_lowersysvals.seq'):
     # ======
     # SETUP
     # ======
@@ -20,14 +20,14 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_p
     fov = 250e-3 #125e-3 = 3D Siemens value #220e-3 = initial val
     Nx = 64
     Ny = 64
-    slice_thickness = 1e-3  # Slice thickness
+    slice_thickness = 3e-3  # Slice thickness
     n_slices = 1
 
     # Set 3T Siemens PRISMA system limits
     system = pp.Opts(
-        max_grad=139,
+        max_grad=90,
         grad_unit='mT/m',
-        max_slew=346,
+        max_slew=140,
         slew_unit='T/m/s',
         # Currently do not have access to these values (23/05/25)
         rf_ringdown_time=30e-6,

@@ -23,28 +23,28 @@ from pypulseq.SAR.SAR_calc import _SAR_from_seq as SAR
 from pypulseq.SAR.SAR_calc import _load_Q 
 
 
-def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_filename: str = 'gre_radial_golden_full_1071ms.seq'):
+def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_filename: str = 'gre_radial_golden_half_orig.seq'):
     # ======
     # SETUP
     # ======
      # FOV for SIEMENS prisma = 125 (3D), 250 (2D)
     fov = 250e-3 # initial val =260e-3
-    Nx = 128  # Define FOV and resolution
+    Nx = 64  # Define FOV and resolution
     alpha = 90 #10 = initial value # Flip angle
-    slice_thickness = 1e-3 #initial val = 3e-3  # Slice thickness
-    TE = 5e-3 #8e-3 = initial val  # Echo time
-    TR = 7.8e-3 #20e-3 = initial val  # Repetition time
-    Nr = 100 #initial val = 60  # Number of radial spokes
+    slice_thickness = 3e-3 #initial val = 3e-3  # Slice thickness
+    TE = 8e-3 #8e-3 = initial val  # Echo time
+    TR = 20e-3 #20e-3 = initial val  # Repetition time
+    Nr = 60 #initial val = 60  # Number of radial spokes
     N_dummy = 20  #20 = initial val # Number of dummy scans
-    delta = 111.25*(np.pi/360) # Angular increment
+    delta = 137.51*(np.pi/360) # Angular increment
 
     rf_spoiling_inc = 117  # RF spoiling increment
 
     # Set 3T Siemens PRISMA system limits
     system = pp.Opts(
-        max_grad=139, #initial val = 28
+        max_grad=28, #initial val = 28
         grad_unit='mT/m',
-        max_slew=346,
+        max_slew=120,
         slew_unit='T/m/s',
         # Currently do not have access to these values (27/05/25)
         rf_ringdown_time=20e-6,
@@ -72,7 +72,7 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
     # Define other gradients and ADC events
     #Trial Nx/2 for half spoke 
     deltak = 1 / fov
-    gx = pp.make_trapezoid(channel='x', flat_area=Nx * deltak, flat_time=6.4e-3 / 5, system=system)
+    gx = pp.make_trapezoid(channel='x', flat_area=Nx /2* deltak, flat_time=6.4e-3 / 5, system=system)
     adc = pp.make_adc(num_samples=Nx, duration=gx.flat_time, delay=gx.rise_time, system=system)
     gx_pre = pp.make_trapezoid(channel='x', area=-gx.area / 2 - deltak / 2, duration=2e-3, system=system)
     gz_reph = pp.make_trapezoid(channel='z', area=-gz.area / 2, duration=2e-3, system=system)

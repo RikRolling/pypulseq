@@ -11,7 +11,7 @@ import numpy as np
 import pypulseq as pp
 
 
-def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_radial_pypulseq.seq'):
+def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_radial_44ms_lowersysvals.seq'):
     # ======
     # SETUP
     # ======
@@ -30,9 +30,9 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_r
 
     # Set 3T Siemens PRISMA system limits
     system = pp.Opts(
-        max_grad=139, #initial val = 28
+        max_grad=75, #initial val = 28
         grad_unit='mT/m',
-        max_slew=346,
+        max_slew=180,
         slew_unit='T/m/s',
         # Currently do not have access to these values (27/05/25)
         rf_ringdown_time=20e-6,

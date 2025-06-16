@@ -18,21 +18,21 @@ import numpy as np
 import pypulseq as pp
 
 
-def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_se_pypulseq.seq'):
+def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_se_46ms_N64_lowesysvals.seq'):
     # ======
     # SETUP
     # ======
     # FOV for SIEMENS prisma = 125 (3D), 250 (2D)
     fov = 250e-3  # Define FOV and resolution
-    Nx = 32
-    Ny = 32
+    Nx = 64
+    Ny = 64
 
     # Set system limits
     # Set 3T Siemens PRISMA system limits
     system = pp.Opts(
-        max_grad=139,
+        max_grad=80,
         grad_unit='mT/m',
-        max_slew=346,
+        max_slew=200,
         slew_unit='T/m/s',
         # Currently do not have access to these values (23/05/25)
         rf_ringdown_time=20e-6,
