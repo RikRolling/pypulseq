@@ -7,7 +7,7 @@ import numpy as np
 import pypulseq as pp
 
 
-def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_orig.seq'):
+def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, seq_filename: str = 'epi_orig.seq'):
     # ======
     # SETUP
     # ======
@@ -89,9 +89,17 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_o
     ok, error_report = seq.check_timing()
     if ok:
         print('Timing check passed successfully')
+        #prints test report
+        print(seq.test_report())
     else:
         print('Timing check failed! Error listing follows:')
         print(error_report)
+
+    # ======
+    # PNS Checker
+    # ======
+
+    seq.calc_pns()
 
     # ======
     # VISUALIZATION
