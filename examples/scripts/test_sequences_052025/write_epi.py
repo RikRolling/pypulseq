@@ -88,8 +88,8 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_o
 
     ok, error_report = seq.check_timing()
     if ok:
-        print(seq.calculate_pns(hardware='MP_GPA_K2309_2250V_951A_AS82.asc'))
-        print(seq.test_report)
+        #print(seq.calculate_pns(hardware='MP_GPA_K2309_2250V_951A_AS82.asc'))
+        print(seq.test_report())
         print('Timing check passed successfully')
         
         
