@@ -7,7 +7,7 @@ import numpy as np
 import pypulseq as pp
 
 
-def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, seq_filename: str = 'epi_orig.seq'):
+def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, test_report: bool = False, seq_filename: str = 'epi_orig.seq'):
     # ======
     # SETUP
     # ======
@@ -58,7 +58,21 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, s
         flat_time=flat_time,
     )
     adc = pp.make_adc(
-        num_samples=Nx_
+        num_samples=Nx,
+        duration=readout_time,
+        delay=gx.rise_time + flat_time / 2 - (readout_time - dwell_time) / 2,
+    )
+
+
+    # Pre-phasing gradients
+    pre_time = 8e-4
+    gx_pre = pp.make_trapezoid(channel='x', system=system, area=-gx.area / 2, duration=pre_time)
+    gz_reph = pp.make_trapezoid(channel='z', system=system, area=-gz.area / 2, duration=pre_time)
+    gy_pre = pp.make_trapezoid(channel='y', system=system, area=-Ny / 2 * delta_k, duration=pre_time)
+
+    # Phase blip in the shortest possible time
+    dur = np.ceil(2 * np.sqrt(delta_k / system.max_slew) / 10e-6) * 10e-6
+    gy = pp.make_trapezoid(channel='y', system=system, area=delta_k, duration=dur)
     # ======
     # CONSTRUCT SEQUENCE
     # ======
@@ -75,8 +89,8 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, s
     ok, error_report = seq.check_timing()
     if ok:
         print('Timing check passed successfully')
-        #prints test report
-        print(seq.test_report())
+        
+        
     else:
         print('Timing check failed! Error listing follows:')
         print(error_report)
@@ -86,7 +100,27 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, s
     # ======
     if pns_check:
         #Combine asc files
-        seq.calc_pns()
+        a, b, c, d = seq.calculate_pns('combined_copy.asc')
+        if a == True:
+            print('PNS check passed')
+        if a == False:
+            print('PNS check failed')
+
+    # ======
+    # Test Report 
+    # ======
+    if test_report:
+        #user to change text name based on read-out trajectory
+        with open('test_report_epi.txt', 'w') as file:   
+            file.write(seq.test_report())
+
+    # ======
+    # Accoustic Frequency Checker
+    # ======
+
+    # ======
+    # SAR
+    # ======
 
     # ======
     # VISUALIZATION
@@ -104,4 +138,4 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, s
 
 
 if __name__ == '__main__':
-    main(plot=True, write_seq=True, pns_check=True)
+    main(plot=False, write_seq=False, pns_check=True, test_report=True)
