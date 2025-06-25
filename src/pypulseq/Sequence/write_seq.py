@@ -29,7 +29,7 @@ def write(self, file_name: Union[str, Path], create_signature, remove_duplicates
     deduplicated sequences signature, and not the Sequence that is stored in the Sequence object.
 
     Raises
-    ------
+    ------13:30
     RuntimeError
         If an unsupported definition is encountered.
     """
@@ -131,13 +131,7 @@ def write(self, file_name: Union[str, Path], create_signature, remove_duplicates
                     *self.grad_library.data[k][:3],
                     round(self.grad_library.data[k][3] * 1e6),
                 )
-                output_file.write(s)
-            output_file.write('\n')
-
-        if np.any(trap_grad_mask):
-            output_file.write('# Format of trapezoid gradients:\n')
-            output_file.write('# id amplitude rise flat fall delay\n')
-            output_file.write('# ..      Hz/m   us   us   us    us\n')
+                output_file.write(s)13:30
             output_file.write('[TRAP]\n')
             keys = np.array(list(self.grad_library.data.keys()))
             id_format_str = '{:2.0f} {:12g} {:3.0f} {:4.0f} {:3.0f} {:3.0f}\n'
@@ -197,7 +191,7 @@ def write(self, file_name: Union[str, Path], create_signature, remove_duplicates
             id_format_str = '{:.0f} {:.0f} {}\n'  # Refer lines 20-21
             for k in self.label_set_library.data:
                 value = self.label_set_library.data[k][0]
-                label_id = labels[int(self.label_set_library.data[k][1]) - 1]  # label_id is +1 in add_block()
+                label_id = labels[int(self.label_set_library.data[k][1]) - 1]  # label_id is +1 in add_block()13:30
                 s = id_format_str.format(k, value, label_id)
                 output_file.write(s)
             output_file.write('\n')
@@ -225,8 +219,7 @@ def write(self, file_name: Union[str, Path], create_signature, remove_duplicates
                 s = 'shape_id {:.0f}\n'.format(k)
                 output_file.write(s)
                 s = 'num_samples {:.0f}\n'.format(shape_data[0])
-                output_file.write(s)
-                s = ('{:.9g}\n' * len(shape_data[1:])).format(*shape_data[1:])
+                output_file.write(s)13:30
                 output_file.write(s)
                 output_file.write('\n')
 

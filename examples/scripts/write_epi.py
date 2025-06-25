@@ -6,8 +6,16 @@ import numpy as np
 
 import pypulseq as pp
 
+from pypulseq.SAR.SAR_calc import _SAR_from_seq as SAR
 
-def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, test_report: bool = False, seq_filename: str = 'epi_orig.seq'):
+from pypulseq.SAR.SAR_calc import _load_Q 
+
+from pypulseq.utils.siemens import readasc as readasc
+
+from pypulseq.utils.siemens import asc_to_hw as asc_to_hw
+
+
+def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, test_report: bool = False, sar: bool = False , acoustic_check: bool=False,seq_filename: str = 'epi_orig.seq'):
     # ======
     # SETUP
     # ======
@@ -26,6 +34,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
         slew_unit='T/m/s',
         rf_ringdown_time=30e-6,
         rf_dead_time=100e-6,
+
     )
 
     seq = pp.Sequence(system)  # Create a new sequence object
@@ -102,7 +111,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
         #Combine asc files
         a, b, c, d = seq.calculate_pns('combined_copy.asc')
         if a == True:
-            print('PNS check passed')
+            print('PNS cfrom pypulseq.utils.siemens import readascheck passed')
         if a == False:
             print('PNS check failed')
 
@@ -117,11 +126,40 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     # ======
     # Accoustic Frequency Checker
     # ======
+    if acoustic_check:
+        asc, extra = readasc.readasc('combined_copy.asc')
+        asc_to_hw.asc_to_acoustic_resonances(asc)
+    
 
+
+    
     # ======
     # SAR
     # ======
+    if sar:
+   
+        Qtmf, Qhmf = _load_Q()
+        sar_values = SAR(seq, Qtmf, Qhmf)
+        sar_values_array = np.column_stack((sar_values[0], sar_values[1], sar_values[2]))
 
+        headers = ["Body mass SAR", "Head mass SAR", "time"]
+        sar_values_table = pd.DataFrame(sar_values_array, columns=headers)
+        sar_values_table.to_csv('SAR.csv', index=False)
+        
+        #SAR checker - print statement will only been shown if SAR is violated for either head or body
+        violation_1 = False
+        violation_2 = False
+        for i in sar_values_table.iloc[:, 1]:
+            if (i >= 3.2):
+                print("SAR head value NOT acceptable")
+                violation_1 = True
+                break
+        #Validation for full body mass SAR
+        for j in sar_values_table.iloc[:, 0]:
+            if (j > 2):
+                print("SAR Body value NOT acceptable")
+                violation_2 = False
+                break
     # ======
     # VISUALIZATION
     # ======
@@ -138,4 +176,4 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
 
 
 if __name__ == '__main__':
-    main(plot=False, write_seq=False, pns_check=True, test_report=True)
+    main(plot=False, write_seq=False, pns_check=True, test_report=True, sar=True)
