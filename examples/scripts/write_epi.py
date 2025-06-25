@@ -58,21 +58,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, s
         flat_time=flat_time,
     )
     adc = pp.make_adc(
-        num_samples=Nx,
-        duration=readout_time,
-        delay=gx.rise_time + flat_time / 2 - (readout_time - dwell_time) / 2,
-    )
-
-    # Pre-phasing gradients
-    pre_time = 8e-4
-    gx_pre = pp.make_trapezoid(channel='x', system=system, area=-gx.area / 2, duration=pre_time)
-    gz_reph = pp.make_trapezoid(channel='z', system=system, area=-gz.area / 2, duration=pre_time)
-    gy_pre = pp.make_trapezoid(channel='y', system=system, area=-Ny / 2 * delta_k, duration=pre_time)
-
-    # Phase blip in the shortest possible time
-    dur = np.ceil(2 * np.sqrt(delta_k / system.max_slew) / 10e-6) * 10e-6
-    gy = pp.make_trapezoid(channel='y', system=system, area=delta_k, duration=dur)
-
+        num_samples=Nx_
     # ======
     # CONSTRUCT SEQUENCE
     # ======
@@ -98,8 +84,9 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, s
     # ======
     # PNS Checker
     # ======
-
-    seq.calc_pns()
+    if pns_check:
+        #Combine asc files
+        seq.calc_pns()
 
     # ======
     # VISUALIZATION
@@ -117,4 +104,4 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, s
 
 
 if __name__ == '__main__':
-    main(plot=True, write_seq=True)
+    main(plot=True, write_seq=True, pns_check=True)
