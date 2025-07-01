@@ -16,9 +16,9 @@ from pypulseq.utils.siemens import readasc as readasc
 
 from pypulseq.utils.siemens import asc_to_hw as asc_to_hw
 
-from pypulseq import calc_rf_bandwidth as bw
+from pypulseq import calc_rf_bandwidth 
 
-from pypulseq import calc_rf_center as c
+from pypulseq import calc_rf_center 
 
 
 def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, test_report: bool = False, sar: bool = False , acoustic_check: bool=False,seq_filename: str = 'epi_orig.seq'):
@@ -136,9 +136,10 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
         asc, extra = readasc.readasc('combined_copy.asc')
         list = asc_to_hw.asc_to_acoustic_resonances(asc)
         print(list)
-        bw = pp.calc_rf_bandwidth.calc_rf_bandwidth(rf)
-        t,id = pp.c.calc_rf_center(rf)
-        freq = np.fft(t)
+        bw = calc_rf_bandwidth(rf)
+        t,id = calc_rf_center(rf)
+        t_array = [t]
+        freq = np.abs(np.fft.fft(t_array))
         print(bw)
         print(freq)
 
