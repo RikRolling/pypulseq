@@ -4,6 +4,8 @@ Demo low-performance EPI sequence without ramp-sampling.
 
 import numpy as np
 
+import pandas as pd
+
 import pypulseq as pp
 
 from pypulseq.SAR.SAR_calc import _SAR_from_seq as SAR
@@ -13,6 +15,10 @@ from pypulseq.SAR.SAR_calc import _load_Q
 from pypulseq.utils.siemens import readasc as readasc
 
 from pypulseq.utils.siemens import asc_to_hw as asc_to_hw
+
+from pypulseq import calc_rf_bandwidth as bw
+
+from pypulseq import calc_rf_center as c
 
 
 def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, test_report: bool = False, sar: bool = False , acoustic_check: bool=False,seq_filename: str = 'epi_orig.seq'):
@@ -111,7 +117,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
         #Combine asc files
         a, b, c, d = seq.calculate_pns('combined_copy.asc')
         if a == True:
-            print('PNS cfrom pypulseq.utils.siemens import readascheck passed')
+            print('PNS check passed')
         if a == False:
             print('PNS check failed')
 
@@ -128,9 +134,13 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     # ======
     if acoustic_check:
         asc, extra = readasc.readasc('combined_copy.asc')
-        asc_to_hw.asc_to_acoustic_resonances(asc)
-    
-
+        list = asc_to_hw.asc_to_acoustic_resonances(asc)
+        print(list)
+        bw = pp.calc_rf_bandwidth.calc_rf_bandwidth(rf)
+        t,id = pp.c.calc_rf_center(rf)
+        freq = np.fft(t)
+        print(bw)
+        print(freq)
 
     
     # ======
@@ -176,4 +186,4 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
 
 
 if __name__ == '__main__':
-    main(plot=False, write_seq=False, pns_check=True, test_report=True, sar=True)
+    main(plot=False, write_seq=False, pns_check=True, test_report=True, sar=True, acoustic_check=True)
