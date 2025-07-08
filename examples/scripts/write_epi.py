@@ -135,13 +135,12 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     if acoustic_check:
         asc, extra = readasc.readasc('combined_copy.asc')
         list = asc_to_hw.asc_to_acoustic_resonances(asc)
-        print(list)
-        bw = calc_rf_bandwidth(rf)
-        t,id = calc_rf_center(rf)
-        t_array = [t]
-        freq = np.abs(np.fft.fft(t_array))
-        print(bw)
-        print(freq)
+        seq.calculate_gradient_spectrum(
+            acoustic_resonances=list
+        )
+        
+       
+    
 
     
     # ======
@@ -150,6 +149,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     if sar:
    
         Qtmf, Qhmf = _load_Q()
+        #print(Qtmf)
         sar_values = SAR(seq, Qtmf, Qhmf)
         sar_values_array = np.column_stack((sar_values[0], sar_values[1], sar_values[2]))
 
@@ -172,6 +172,13 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
                 violation_2 = False
                 break
     # ======
+    # K-SPACE VISUALIZATION
+    # ======
+
+
+
+
+    # ======
     # VISUALIZATION
     # ======
     if plot:
@@ -187,4 +194,4 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
 
 
 if __name__ == '__main__':
-    main(plot=False, write_seq=False, pns_check=True, test_report=True, sar=True, acoustic_check=True)
+    main(plot=False, write_seq=False, pns_check=False, test_report=False, sar=False, acoustic_check=True)

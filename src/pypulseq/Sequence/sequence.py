@@ -245,6 +245,8 @@ class Sequence:
             Frequency axis of the spectrograms.
         times : np.ndarray
             Time axis of the spectrograms (only relevant when combine_mode == 'none').
+        
+    
 
         """
         if acoustic_resonances is None:

@@ -186,5 +186,5 @@ def calculate_gradient_spectrum(
                 plt.axhline(res['frequency'], color='r', linestyle='-')
                 plt.axhline(res['frequency'] - res['bandwidth'] / 2, color='r', linestyle='--')
                 plt.axhline(res['frequency'] + res['bandwidth'] / 2, color='r', linestyle='--')
-
+        
     return spectrograms, spectrogram_rss, frequencies, times
