@@ -39,7 +39,7 @@ def calculate_gradient_spectrum(
         Time range over which to calculate the spectrograms as a list of
         two timepoints (in seconds) (e.g. [1, 1.5])
         The default is None.
-    plot : bool, optional
+    plot_grad : bool, optional
         Whether to plot the spectograms. The default is True.
     combine_mode : str, optional
         How to combine all windows into one spectrogram, options:

@@ -920,7 +920,7 @@ class Sequence:
         if grad_disp not in valid_grad_units:
             raise ValueError('Unsupported gradient unit. Supported gradient units are: ' + str(valid_grad_units))
 
-        #rik additions, enable scroll with zoom
+        
         
         fig1, fig2 = plt.figure(), plt.figure()
         sp11 = fig1.add_subplot(311)
@@ -1067,7 +1067,7 @@ class Sequence:
         disp_range = t_factor * np.array([time_range[0], min(t0, time_range[1])])
         [x.set_xlim(disp_range) for x in [sp11, sp12, sp13, *fig2_subplots]]
         
-        #Rik additions
+        
         
     
     
