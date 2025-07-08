@@ -101,6 +101,10 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
             seq.add_block(gy)  # Phase blip
             gx.amplitude = -gx.amplitude  # Reverse polarity of read gradient
 
+
+    # ======
+    # Timing Check
+    # ======
     ok, error_report = seq.check_timing()
     if ok:
         print('Timing check passed successfully')
@@ -182,6 +186,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     # VISUALIZATION
     # ======
     if plot:
+    # Plot includes acoustic resonance checker plot
         seq.plot()  # Plot sequence waveforms
 
     # =========
@@ -194,4 +199,4 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
 
 
 if __name__ == '__main__':
-    main(plot=False, write_seq=False, pns_check=False, test_report=False, sar=False, acoustic_check=True)
+    main(plot=True, write_seq=False, pns_check=False, test_report=False, sar=False, acoustic_check=True)
