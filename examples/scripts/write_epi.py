@@ -66,6 +66,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     dwell_time = 4e-6
     readout_time = Nx * dwell_time
     flat_time = np.ceil(readout_time * 1e5) * 1e-5  # round-up to the gradient raster
+    #print(flat_time)
     gx = pp.make_trapezoid(
         channel='x',
         system=system,
@@ -86,7 +87,20 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     gy_pre = pp.make_trapezoid(channel='y', system=system, area=-Ny / 2 * delta_k, duration=pre_time)
 
     # Phase blip in the shortest possible time
-    dur = np.ceil(2 * np.sqrt(delta_k / system.max_slew) / 10e-6) * 10e-6
+    #slew_blip = (4*delta_k)/((2*(system.max_grad/system.max_slew)+flat_time)**2)
+
+
+    #Code to find optimum gradient value = BROKEN
+    dur = np.ceil(2 * np.sqrt(delta_k /system.max_slew) / 10e-6) * 10e-6
+    grad = 1
+    min_dur = (grad/system.max_slew)*2 + flat_time
+    while min_dur < dur:
+        min_dur = (grad/system.max_slew)*2 + flat_time
+        grad = next_grad
+        next_grad +=1
+    print(grad)
+   
+
     gy = pp.make_trapezoid(channel='y', system=system, area=delta_k, duration=dur)
     # ======
     # CONSTRUCT SEQUENCE
