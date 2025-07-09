@@ -162,11 +162,14 @@ def make_trapezoid(
                     area, max_slew, max_grad, system.grad_raster_time
                 )
                 min_duration = rise_time + flat_time + fall_time
-                #assert duration >= min_duration, (
-                   # f'Requested area is too large for this gradient. Minimum required duration is '
-                    #f'{round(min_duration * 1e6)} us'
-                #)
-                
+                #if duration <= min_duration:
+                    #duration = min_duration
+                    #print('duation too small, value replaced with minimum duration')
+                assert duration >= min_duration, (
+                   f'Requested area is too large for this gradient. Minimum required duration is '
+                   f'{round(min_duration * 1e6)} us'
+                )
+
                 dc = 1 / abs(2 * max_slew) + 1 / abs(2 * max_slew)
                 amplitude2 = (duration - math.sqrt(duration**2 - 4 * abs(area) * dc)) / (2 * dc)
             else:

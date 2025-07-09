@@ -141,7 +141,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     # ======
     if test_report:
         #user to change text name based on read-out trajectory
-        with open('test_report_epi_fullsample.txt', 'w') as file:
+        with open('test_report_epi.txt', 'w') as file:
             file.write(seq.test_report())
 
     # ======
@@ -168,7 +168,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
 
         headers = ["Body mass SAR", "Head mass SAR", "time"]
         sar_values_table = pd.DataFrame(sar_values_array, columns=headers)
-        sar_values_table.to_csv('SAR_EPI_fullsample.csv', index=False)
+        sar_values_table.to_csv('SAR.csv', index=False)
 
         #SAR checker - print statement will only been shown if SAR is violated for either head or body
         violation_1 = False
