@@ -29,7 +29,7 @@ from pypulseq.utils.siemens import readasc as readasc
 from pypulseq.utils.siemens import asc_to_hw as asc_to_hw
 
 
-def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, test_report: bool = False, sar: bool = False , acoustic_check: bool = False ,k_space: bool = False, seq_filename: str = 'gre_radial_full_N100.seq'):
+def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, test_report: bool = False, sar: bool = False , acoustic_check: bool = False ,k_space: bool = False, seq_filename: str = 'gre_radial_half_N100.seq'):
     # ======
     # SETUP
     # ======
@@ -39,10 +39,10 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     alpha = 90 #10 = initial value # Flip angle
     slice_thickness = 3e-3 #initial val = 3e-3  # Slice thickness
     TE = 5e-3  #7.5 #8e-3 = initial val  # Echo time
-    TR = 10e-3 #15 #20e-3 = initial val  # Repetition time
+    TR = 8e-3 #15 #20e-3 = initial val  # Repetition time
     Nr = 100 #initial val = 60  # Number of radial spokes
     N_dummy = 0  #20 = initial val # Number of dummy scans
-    delta = 111.25*(np.pi/360) # Angular increment
+    delta = 137.51*(np.pi/360) # Angular increment
 
     rf_spoiling_inc = 117  # RF spoiling increment
 
@@ -78,7 +78,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     # Define other gradients and ADC events
     #Trial Nx/2 for half spoke
     deltak = 1 / fov
-    gx = pp.make_trapezoid(channel='x', flat_area=Nx * deltak, flat_time=6.4e-3 / 5, system=system)
+    gx = pp.make_trapezoid(channel='x', flat_area=Nx/2 * deltak, flat_time=6.4e-3 / 5, system=system)
     adc = pp.make_adc(num_samples=Nx, duration=gx.flat_time, delay=gx.rise_time, system=system)
     gx_pre = pp.make_trapezoid(channel='x', area=-gx.area / 2 - deltak / 2, duration=2e-3, system=system)
     gz_reph = pp.make_trapezoid(channel='z', area=-gz.area / 2, duration=2e-3, system=system)
@@ -149,7 +149,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     # ======
     if test_report:
         #user to change text name based on read-out trajectory
-        with open('test_report_radialfull_N100.txt', 'w') as file:
+        with open('test_report_radialhalf_N100.txt', 'w') as file:
             file.write(seq.test_report())
 
     # ======
@@ -175,7 +175,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
 
         headers = ["Body mass SAR", "Head mass SAR", "time"]
         sar_values_table = pd.DataFrame(sar_values_array, columns=headers)
-        sar_values_table.to_csv('SAR_fullrad_N100.csv', index=False)
+        sar_values_table.to_csv('SAR_halfrad_N100.csv', index=False)
 
         #SAR checker - print statement will only been shown if SAR is violated for either head or body
         violation_1 = False
