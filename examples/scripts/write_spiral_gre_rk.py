@@ -190,7 +190,7 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
     if grad_oversampling:
         spiral_grad_shape_initial = []
         for i in range
-
+        #Ask a matlab bestie what is going on!!!!!
 
 
 
