@@ -14,7 +14,7 @@ Unique k-space positions (aka cols, rows, etc.): 65 64
 Dimensions: 2
 Spatial resolution: 3.91 mm
 Spatial resolution: 3.91 mm
-Repetitions/slices/contrasts: 1.0; range: [(np.float64(1.0), np.float64(1.0))]
+Repetitions/slices/contrasts: 1.0; range: [(1.0, 1.0)]
 Non-cartesian/irregular encoding trajectory detected (eg: EPI, spiral, radial, etc.)
 Max gradient: 1000000 196923 1451537 Hz/m == 23.49 4.63 34.09 mT/m
 Max slew rate: 6250000000 4444444444 6349206349 Hz/m/s == 146.80 104.39 149.13 T/m/s

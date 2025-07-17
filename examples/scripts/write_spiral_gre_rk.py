@@ -18,7 +18,7 @@ from pypulseq.SAR.SAR_calc import _SAR_from_seq as SAR
 
 from pypulseq.SAR.SAR_calc import _load_Q 
  
-def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_filename: str = 'gre_radial_golden_full_1071ms.seq'):
+def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, test_report: bool = False, sar: bool = False , acoustic_check: bool = False ,k_space: bool = False, seq_filename: str = 'gre_spiral.seq'):
     # ======
     # SETUP
     # ======
@@ -59,13 +59,15 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
         flip_angle=110*(np.pi/180),
         system=system,
         duration=3e-3,
-        slice_thickness=slice_thickness,
+        dwell=10e-6,
+        bandwidth=abs(sat_freq),
+        
         apodization=0.5,
         time_bw_product=4,
         use='saturation',
     )
 
-    rf_fs.phase_ppm = -2*np.pi*rf_fs.freq_ppm*rf_fs.center
+    rf_fs.phase_ppm = -2*np.pi*rf_fs.freq_ppm*rf_fs.center_pos
 
     gz_fs = pp.make_trapezoid(
         channel='z',
@@ -191,7 +193,9 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
         else:
             seq.add_block(*pp.rotate(gx, angle=phi, axis='z'))
         seq.add_block(*pp.rotate(gx_spoil, gz_spoil, pp.make_delay(delay_TR), angle=phi, axis='z'))
-
+    # ======
+    # Timing Check
+    # ======
     ok, error_report = seq.check_timing()
     if ok:
         print('Timing check passed successfully')
@@ -199,21 +203,51 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
         print('Timing check failed! Error listing follows:')
         print(error_report)
 
-    # ========
-    # SAR CHECKER
-    # ========
+    # ======
+    # PNS Checker
+    # ======
+    if pns_check:
+        #Combine asc files
+        a, b, c, d = seq.calculate_pns('combined_copy.asc')
+        if a == True:
+            print('PNS check passed')
+        if a == False:
+            print('PNS check failed')
 
-    # USE OF SAR IS INCORRECT!!! wE REQUIRE Q MATRIX
+    # ======
+    # Test Report
+    # ======
+    if test_report:
+        #user to change text name based on read-out trajectory
+        with open('test_report_epi_fullsample.txt', 'w') as file:
+            file.write(seq.test_report())
+
+    # ======
+    # Accoustic Frequency Checker
+    # ======
+    if acoustic_check:
+        asc, extra = readasc.readasc('combined_copy.asc')
+        list = asc_to_hw.asc_to_acoustic_resonances(asc)
+        seq.calculate_gradient_spectrum(
+            acoustic_resonances=list,
+            plot=True
+        )
+
+
+    # ======
+    # SAR
+    # ======
     if sar:
-   
+
         Qtmf, Qhmf = _load_Q()
+        #print(Qtmf)
         sar_values = SAR(seq, Qtmf, Qhmf)
         sar_values_array = np.column_stack((sar_values[0], sar_values[1], sar_values[2]))
 
         headers = ["Body mass SAR", "Head mass SAR", "time"]
         sar_values_table = pd.DataFrame(sar_values_array, columns=headers)
-        sar_values_table.to_csv('SAR.csv', index=False)
-        
+        sar_values_table.to_csv('SAR_EPI_fullsample.csv', index=False)
+
         #SAR checker - print statement will only been shown if SAR is violated for either head or body
         violation_1 = False
         violation_2 = False
@@ -228,28 +262,37 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
                 print("SAR Body value NOT acceptable")
                 violation_2 = False
                 break
-        
-    
-   
+    # ======
+    # K-SPACE VISUALIZATION
+    # ======
+    if k_space:
+
+        k_adc, k_all, t_excite, t_refocus, t_adc = seq.calculate_kspace()
+        plt.figure()
+        plt.title('Estimated K-Space Trajectory')
+        plt.plot(k_adc[0], k_adc[1])
+        plt.show()
+
+
+
+
+
+
     # ======
     # VISUALIZATION
     # ======
     if plot:
-        seq.plot()
+
+        seq.plot()  # Plot sequence waveforms
 
     # =========
     # WRITE .SEQ
     # =========
     if write_seq:
-        seq.set_definition(key='FOV', value=[fov, fov, slice_thickness])
-        seq.set_definition(key='Name', value='gre_rad')
         seq.write(seq_filename)
 
     return seq
 
 
-
 if __name__ == '__main__':
-    main(plot=True, write_seq=True, sar=True)
-
-  
+    main(plot=True, write_seq=True, pns_check=True, test_report=True, sar=False, acoustic_check=True, k_space=True)
