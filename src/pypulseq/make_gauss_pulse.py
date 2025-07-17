@@ -35,7 +35,7 @@ def make_gauss_pulse(
 ]:
     """
     Create a [optionally slice selective] Gauss pulse.
-
+    RIK TO ADD FREQPPM AND PHASEPPM AS PER MATLAB FUNCTIONALITY!
     See also `pypulseq.Sequence.sequence.Sequence.add_block()`.
 
     Parameters
