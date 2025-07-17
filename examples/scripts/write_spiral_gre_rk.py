@@ -16,15 +16,14 @@ import matplotlib as plt
 
 from pypulseq.SAR.SAR_calc import _SAR_from_seq as SAR
 
-<<<<<<< HEAD
-from pypulseq.SAR.SAR_calc import _load_Q 
- 
-def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, test_report: bool = False, sar: bool = False , acoustic_check: bool = False ,k_space: bool = False, seq_filename: str = 'gre_spiral.seq'):
-=======
 from pypulseq.SAR.SAR_calc import _load_Q
 
-def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_filename: str = 'gre_radial_golden_full_1071ms.seq'):
->>>>>>> 955e10bf0de467faa4ef33d7ec7fb494ae53de93
+from pypulseq.utils.siemens import readasc as readasc
+
+from pypulseq.utils.siemens import asc_to_hw as asc_to_hw
+
+def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, test_report: bool = False, sar: bool = False , acoustic_check: bool = False ,k_space: bool = False, seq_filename: str = 'gre_spiral.seq'):
+
     # ======
     # SETUP
     # ======
@@ -64,23 +63,16 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
     rf_fs = pp.make_gauss_pulse(
         flip_angle=110*(np.pi/180),
         system=system,
-<<<<<<< HEAD
-        duration=3e-3,
-        dwell=10e-6,
-        bandwidth=abs(sat_freq),
-        
-        apodization=0.5,
-        time_bw_product=4,
-=======
         duration=8e-3,
         dwell=10e-6,
         bandwidth=abs(sat_freq),
         freq_offset=sat_freq,
->>>>>>> 955e10bf0de467faa4ef33d7ec7fb494ae53de93
         use='saturation',
     )
 
-    rf_fs.phase_ppm = -2*np.pi*rf_fs.freq_ppm*rf_fs.center_pos
+    rf_fs.freq_ppm = rf_fs.freq_offset/(1e-6*B0*system.gamma)
+
+    rf_fs.phase_ppm = -2*np.pi*rf_fs.freq_ppm * rf_fs.center
 
     gz_fs = pp.make_trapezoid(
         channel='z',
@@ -105,26 +97,17 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
    # define k-space parameters
 
     deltak = 1 / fov
-    k_radius = np.round(Nx/2) #Spiral radius
-    k_samples = np.round(2*np.pi*k_radius)*adc_oversampling #no. of samples on outest circle of spiral
+    k_radius = int(np.round(Nx/2)) #Spiral radius
+    k_samples = int(np.round(2*np.pi*k_radius)*adc_oversampling) #no. of samples on outest circle of spiral
     tos_calculation = 10 #time oversampling
     grad_oversampling = True
-    c_max = k_radius*k_samples*tos_calculation
-    r = np.array([])
-    a = np.array([])
-    ka = np.array([])
 
-    for c in range(0, c_max):
-        r_val = deltak*c/k_samples/tos_calculation
-        r = np.append(r, r_val)
-
-        a_val = (c % (k_samples*tos_calculation))*2*np.pi/k_samples/tos_calculation
-        a = np.append(a, a_val)
-
-        ka_val = r*np.exp(1j*a)
-        ka = np.append(ka, ka_val)
-
-    ka = [ka.real, ka.imag] #kx and ky matrix
+    ka = np.zeros((2, k_radius * k_samples + 1))
+    for c in range(k_radius*k_samples*tos_calculation + 1):
+        r = deltak * c/(k_samples * tos_calculation)
+        a = (c % (k_samples*tos_calculation))*2*np.pi/(k_samples*tos_calculation)
+        point = r * np.exp(1j*a)
+        ka[:,c] = [np.real(point), np.imag(point)] #kx and ky matrix
 
 
     # Calc gradients and slew rates
@@ -161,21 +144,18 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
 
     t_smooth = np.array([0,np.cumsum(dt_opt,2)] )
 
-    dt_grad = system.grad_raster_time/(1+ grad_oversampling)
+    dt_grad = system.grad_raster_time/(1+ int(grad_oversampling))
 
     if grad_oversampling:
         safety_factor_1st_timestep = 0.7
         t_end = t_smooth[-1] - (safety_factor_1st_timestep)*dt_grad
-        #idk what this 0:np.floor() means?!! ARGH
-        t_grad_x = [0]
-        for x in range(0, (safety_factor_1st_timestep + (np.floor(t_end/dt_grad)))*dt_grad):
-            t_grad = np.append(t_grad_x, x)
-
+        num_steps = int(np.floor(t_end / dt_grad)) + 1
+        t_grad = np.concatenate(([0], (safety_factor_1st_timestep + np.arrange(num_steps))* dt_grad))
     else:
         t_end = t_smooth[-1] - 0.5*dt_grad
-        t_grad_y = [0]
-        for y in range(0, (safety_factor_1st_timestep + (np.floor(t_end/dt_grad)))*dt_grad):
-            t_grad = np.append(t_grad_y,y)
+        num_steps = int(np.floor(t_end / dt_grad)) + 1
+        t_grad = np.concatenate(([0], (0.5 + np.arrange(num_steps))* dt_grad))
+
 
 
     kopt = np.interp(np.conjugate((t_smooth, np.conjugate(ka), t_grad)))
@@ -196,38 +176,87 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
     #Define gradients and adc events
     adc_time = dt_grad*spiral_grad_shape.shape[1]
     adc_samples_desired = k_radius*k_samples
-    adc_dwell = round(adc_time/adc_samples_desired/system.adc_raster_time)*system.adc_raster_time
-    adc_segments, adc_samples_persegment = pp.calc_adc_segments(
+    adc_dwell = round(adc_time/(adc_samples_desired*system.adc_raster_time))*system.adc_raster_time
+    adc_samples_desired = np.ceil(adc_time/adc_dwell)
+    adc_segments, adc_samples_per_segment = pp.calc_adc_segments(
         num_samples=adc_samples_desired,
         dwell=adc_dwell,
-        delay=round((pp.calc_duration(gz_reph)-adc_dwell/2)/system.rf_raster_time)*system.rf_raster_time
+        system=system
         )
-    if grad_oversampling:
-        spiral_grad_shape_initial = []
-        for i in range
-        #Ask a matlab bestie what is going on!!!!!
+    adc_samples = adc_segments*adc_samples_per_segment
+    adc = pp.make_adc(
+        num_samples=adc_samples,
+        dwell=adc_dwell,
+        delay=np.round((pp.calc_duration(gz_reph)- adc_dwell/2)/system.rf_raster_time)*system.rf_raster_time
+        )
+    if not grad_oversampling:
+        last_column = spiral_grad_shape[:, -1][:, np.newaxis]
+        spiral_grad_shape = np.hstack((spiral_grad_shape, last_column))
+    else:
+        last_column = spiral_grad_shape[:, -1][:, np.newaxis]
+        spiral_grad_shape = np.hstack((spiral_grad_shape, last_column, last_column))
+
+    if spiral_grad_shape.shape[1] % 2 == 0:
+        spiral_grad_shape = np.hstack((spiral_grad_shape, last_column))
+
+    # Readout Gradients
+
+    gx = pp.make_arbitrary_grad(
+        channel='x',
+        waveform=spiral_grad_shape[0,:],
+        delay=pp.calc_duration(gz_reph),
+        first=0,
+        last=spiral_grad_shape[0,-1],
+        system=system,
+        oversampling=grad_oversampling
+      )
 
 
+    gy = pp.make_arbitrary_grad(
+        channel='y',
+        waveform=spiral_grad_shape[1,:],
+        delay=pp.calc_duration(gz_reph),
+        first=0,
+        last=spiral_grad_shape[1,-1],
+        system=system,
+        oversampling=grad_oversampling
+      )
+
+    #Spoiler Gradients
+
+    gz_spoil=pp.make_trapezoid(
+        channel='z',
+        system=system,
+        area=deltak*Nx*4
+        )
+
+    gx_spoil = pp.make_extended_trapezoid(
+        channel='x',
+        times=[0, pp.calc_duration(gz_spoil)],
+        amplitudes=[spiral_grad_shape[0, -1], 0],
+        system=system
+        )
+
+    gy_spoil = pp.make_extended_trapezoid(
+    channel='y',
+    times=[0, pp.calc_duration(gz_spoil)],
+    amplitudes=[spiral_grad_shape[1, -1], 0],
+    system=system
+    )
 
     # ======
     # CONSTRUCT SEQUENCE
     # ======
-    for i in range(-N_dummy, Nr + 1):
-        rf.phase_offset = rf_phase / 180 * np.pi
-        adc.phase_offset = rf_phase / 180 * np.pi
-        rf_inc = divmod(rf_inc + rf_spoiling_inc, 360.0)[1]
-        rf_phase = divmod(rf_inc + rf_phase, 360.0)[1]
-
+    for i in range(n_slices):
+        seq.add_block(rf_fs, gz_fs) #fat sat
+        rf.freq_offset = gz.amplitude * slice_thickness * (i - (n_slices - 1)/2)
         seq.add_block(rf, gz)
-        #read through k-space defined here
-        phi = delta * (i - 1)
-        seq.add_block(*pp.rotate(gx_pre, gz_reph, angle=phi, axis='z'))
-        seq.add_block(pp.make_delay(delay_TE))
-        if i > 0:
-            seq.add_block(*pp.rotate(gx, adc, angle=phi, axis='z'))
-        else:
-            seq.add_block(*pp.rotate(gx, angle=phi, axis='z'))
-        seq.add_block(*pp.rotate(gx_spoil, gz_spoil, pp.make_delay(delay_TR), angle=phi, axis='z'))
+        # rotation and readout
+        gx_rot, gy_rot = pp.rotate(np.array([gx,gy]), angle=phi, axis='z')
+        seq.add_block(gz_reph, gx_rot, gy_rot, adc)
+        gx_spoil_rot, gy_spoil_rot = pp.rotate(np.array([gx_spoil, gy_spoil]), angle=phi, axis='z')
+
+
     # ======
     # Timing Check
     # ======
@@ -266,7 +295,7 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
         seq.calculate_gradient_spectrum(
             acoustic_resonances=list,
             plot=True
-        )
+    )
 
 
     # ======
@@ -281,27 +310,24 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
 
         headers = ["Body mass SAR", "Head mass SAR", "time"]
         sar_values_table = pd.DataFrame(sar_values_array, columns=headers)
-<<<<<<< HEAD
-        sar_values_table.to_csv('SAR_EPI_fullsample.csv', index=False)
-=======
         sar_values_table.to_csv('SAR.csv', index=False)
->>>>>>> 955e10bf0de467faa4ef33d7ec7fb494ae53de93
 
-        #SAR checker - print statement will only been shown if SAR is violated for either head or body
-        violation_1 = False
-        violation_2 = False
-        for i in sar_values_table.iloc[:, 1]:
-            if (i >= 3.2):
-                print("SAR head value NOT acceptable")
-                violation_1 = True
-                break
+
+    #SAR checker - print statement will only been shown if SAR is violated for either head or body
+    violation_1 = False
+    violation_2 = False
+    for i in sar_values_table.iloc[:, 1]:
+        if (i >= 3.2):
+            print("SAR head value NOT acceptable")
+            violation_1 = True
+            break
         #Validation for full body mass SAR
         for j in sar_values_table.iloc[:, 0]:
             if (j > 2):
                 print("SAR Body value NOT acceptable")
                 violation_2 = False
                 break
-<<<<<<< HEAD
+
     # ======
     # K-SPACE VISUALIZATION
     # ======
@@ -315,8 +341,6 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
 
 
 
-=======
->>>>>>> 955e10bf0de467faa4ef33d7ec7fb494ae53de93
 
 
 
@@ -337,9 +361,5 @@ def main(plot: bool = False, write_seq: bool = False, sar: bool = False , seq_fi
 
 
 if __name__ == '__main__':
-<<<<<<< HEAD
     main(plot=True, write_seq=True, pns_check=True, test_report=True, sar=False, acoustic_check=True, k_space=True)
-=======
-    main(plot=True, write_seq=True, sar=True)
 
->>>>>>> 955e10bf0de467faa4ef33d7ec7fb494ae53de93

@@ -129,6 +129,8 @@ def make_gauss_pulse(
             stacklevel=2,
         )
         rf.delay = rf.dead_time
+    # RK added extra line
+    rf.center=duration*center_pos
 
     if return_gz:
         if slice_thickness == 0:
