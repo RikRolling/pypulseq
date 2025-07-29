@@ -217,4 +217,4 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
 
 
 if __name__ == '__main__':
-    main(plot=True, write_seq=True, pns_check=True, test_report=True, sar=True, acoustic_check=True, k_space=True)
+    main(plot=False, write_seq=True, pns_check=False, test_report=False, sar=False, acoustic_check=False, k_space=False)
