@@ -84,7 +84,7 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'epi_u
     dur_u = np.ceil(2*2 * np.sqrt(delta_k / system.max_slew) / 10e-6) * 10e-6
     gy = pp.make_trapezoid(channel='y', system=system, area=delta_k, duration=dur)
     gy_amplitude_undersample = 2*gy.amplitude
-    gy_undersample = pp.make_trapezoid(channel='y', system=system, amplitude=gy_amplitude_undersample, duration=dur)
+    gy_undersample = pp.make_trapezoid(channel='y', system=system, amplitude=gy_amplitude_undersample, duration=dur_u)
     N_u = int(Ny/2)
     
 
