@@ -29,7 +29,7 @@ from pypulseq.utils.siemens import readasc as readasc
 from pypulseq.utils.siemens import asc_to_hw as asc_to_hw
 
 
-def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, test_report: bool = False, acoustic_check: bool = False ,k_space: bool = False, seq_filename: str = 'GAR_test.seq'):
+def main(plot_seq: bool = False, write_seq: bool = False, pns_check: bool = False, test_report: bool = False, acoustic_check: bool = False ,k_space: bool = False, seq_filename: str = 'GAR_N100_TR28e-4.seq'):
     # ======
     # SETUP
     # ======
@@ -37,10 +37,10 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     fov = 250e-3 # initial val =260e-3
     Nx = 64  # Define FOV and resolution
     alpha = 90 #10 = initial value # Flip angle
-    slice_thickness = 3e-3 #initial val = 3e-3  # Slice thickness
-    TE = 4e-3  #7.5 #8e-3 = initial val  # Echo time
-    TR = 5.5e-3 #15 #20e-3 = initial val  # Repetition time
-    Nr = 10 #initial val = 60  # Number of radial spokes
+    slice_thickness = 1e-2 #initial val = 3e-3  # Slice thickness #DIMAC EPI slice_thickness = 1e-2
+    TE = 1.8e-3  #7.5 #8e-3 = initial val  # Echo time
+    TR = 2.8e-3 #15 #20e-3 = initial val  # Repetition time
+    Nr = 100 #initial val = 60  # Number of radial spokes
     N_dummy = 0  #20 = initial val # Number of dummy scans
     delta = 111.25*(np.pi/360) # Angular increment
 
@@ -66,7 +66,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     # Create alpha-degree slice selection pulse and gradient
     rf, gz, _ = pp.make_sinc_pulse(
         apodization=0.5,
-        duration=9e-4,
+        duration=2.5e-4,
         flip_angle=alpha * np.pi / 180,
         slice_thickness=slice_thickness,
         system=system,
@@ -78,10 +78,10 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     # Define other gradients and ADC events
     #Trial Nx/2 for half spoke
     deltak = 1 / fov
-    gx = pp.make_trapezoid(channel='x', flat_area=Nx * deltak, flat_time=6.4e-3 / 5, system=system)
+    gx = pp.make_trapezoid(channel='x', flat_area=Nx * deltak, flat_time=6.4e-3/5, system=system) #flat_time=6.4e-3/5
     adc = pp.make_adc(num_samples=Nx, duration=gx.flat_time, delay=gx.rise_time, system=system)
-    gx_pre = pp.make_trapezoid(channel='x', area=-gx.area / 2 - deltak / 2, duration=2e-3, system=system)
-    gz_reph = pp.make_trapezoid(channel='z', area=-gz.area / 2, duration=2e-3, system=system)
+    gx_pre = pp.make_trapezoid(channel='x', area=-gx.area / 2 - deltak / 2, duration=8e-4, system=system)
+    gz_reph = pp.make_trapezoid(channel='z', area=-gz.area / 2, duration=8e-4, system=system)
     # Gradient spoiling
     gx_spoil = pp.make_trapezoid(channel='x', area=0.5 * Nx * deltak, system=system)
     gz_spoil = pp.make_trapezoid(channel='z', area=4 / slice_thickness, system=system)
@@ -149,17 +149,18 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     # ======
     if test_report:
         #user to change text name based on read-out trajectory
-        with open('test_report_GAR_test.txt', 'w') as file:
+        with open('GAR_N100_TR28e-4.txt', 'w') as file:
             file.write(seq.test_report())
 
     # ======
     # Accoustic Frequency Checker
     # ======
     if acoustic_check:
-        asc, extra = readasc.readasc('/cubric/data/c24073803/pypulseq_repo/pypulseq/rik_scripts/combined_copy.asc')
+        asc, extra = readasc.readasc('combined_copy.asc')
         list = asc_to_hw.asc_to_acoustic_resonances(asc)
         seq.calculate_gradient_spectrum(
             acoustic_resonances=list,
+            combine_mode='max',
             plot=True
          )
     # ========
@@ -209,7 +210,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     # ======
     # VISUALIZATION
     # ======
-    if plot:
+    if plot_seq:
         seq.plot()
 
     # =========
@@ -225,4 +226,4 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     #plt.close()
 
 if __name__ == '__main__':
-    main(plot=True, write_seq=False, pns_check=False, test_report=False, acoustic_check=True, k_space=True)
+    main(plot_seq=True, write_seq=True, pns_check=True, test_report=True, acoustic_check=True, k_space=True)
