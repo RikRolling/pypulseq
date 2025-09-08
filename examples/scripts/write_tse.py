@@ -26,7 +26,7 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'tse_p
     seq = pp.Sequence(system)  # Create a new sequence object
     fov = 256e-3  # Define FOV and resolution
     Nx, Ny = 64, 64
-    n_echo = 16  # Number of echoes
+    n_echo = 160  # Number of echoes
     n_slices = 1
     rf_flip = 180  # Flip angle
     if isinstance(rf_flip, int):

@@ -8,7 +8,7 @@ from scipy.signal import spectrogram
 def calculate_gradient_spectrum(
     obj,
     max_frequency: float = 2000,
-    window_width: float = 0.05,
+    window_width: float = 0.0016,
     frequency_oversampling: float = 3,
     time_range: Union[List[float], None] = None,
     plot: bool = True,

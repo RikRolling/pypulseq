@@ -29,7 +29,7 @@ from pypulseq.utils.siemens import readasc as readasc
 from pypulseq.utils.siemens import asc_to_hw as asc_to_hw
 
 
-def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, test_report: bool = False, sar: bool = False , acoustic_check: bool = False ,k_space: bool = False, seq_filename: str = 'gre_radial_half_N100.seq'):
+def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, test_report: bool = False, acoustic_check: bool = False ,k_space: bool = False, seq_filename: str = 'radial_full_john.seq'):
     # ======
     # SETUP
     # ======
@@ -38,17 +38,17 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     Nx = 64  # Define FOV and resolution
     alpha = 90 #10 = initial value # Flip angle
     slice_thickness = 3e-3 #initial val = 3e-3  # Slice thickness
-    TE = 5e-3  #7.5 #8e-3 = initial val  # Echo time
-    TR = 8e-3 #15 #20e-3 = initial val  # Repetition time
-    Nr = 100 #initial val = 60  # Number of radial spokes
+    TE = 8e-3  #7.5 #8e-3 = initial val  # Echo time
+    TR = 12e-3 #15 #20e-3 = initial val  # Repetition time
+    Nr = 3 #initial val = 60  # Number of radial spokes
     N_dummy = 0  #20 = initial val # Number of dummy scans
-    delta = 137.51*(np.pi/360) # Angular increment
+    delta = 111.25*(np.pi/360) # Angular increment
 
     rf_spoiling_inc = 117  # RF spoiling increment
 
     # Set 3T Siemens PRISMA system limits
     system = pp.Opts(
-        max_grad=50, #initial val = 28
+        max_grad=25, #initial val = 28
         grad_unit='mT/m',
         max_slew=130,#120
         slew_unit='T/m/s',
@@ -78,7 +78,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     # Define other gradients and ADC events
     #Trial Nx/2 for half spoke
     deltak = 1 / fov
-    gx = pp.make_trapezoid(channel='x', flat_area=Nx/2 * deltak, flat_time=6.4e-3 / 5, system=system)
+    gx = pp.make_trapezoid(channel='x', flat_area=Nx * deltak, flat_time=6.4e-3 / 5, system=system)
     adc = pp.make_adc(num_samples=Nx, duration=gx.flat_time, delay=gx.rise_time, system=system)
     gx_pre = pp.make_trapezoid(channel='x', area=-gx.area / 2 - deltak / 2, duration=2e-3, system=system)
     gz_reph = pp.make_trapezoid(channel='z', area=-gz.area / 2, duration=2e-3, system=system)
@@ -149,7 +149,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     # ======
     if test_report:
         #user to change text name based on read-out trajectory
-        with open('test_report_radialhalf_N100.txt', 'w') as file:
+        with open('test_report_full_john.txt', 'w') as file:
             file.write(seq.test_report())
 
     # ======
@@ -167,6 +167,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     # ========
 
     # USE OF SAR IS INCORRECT!!! wE REQUIRE Q MATRIX
+    '''
     if sar:
 
         Qtmf, Qhmf = _load_Q()
@@ -191,7 +192,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
                 print("SAR Body value NOT acceptable")
                 violation_2 = False
                 break
-
+    '''
     # ======
     # K-SPACE VISUALIZATION
     # ======
@@ -199,8 +200,10 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
 
       k_adc, k_all, t_excite, t_refocus, t_adc = seq.calculate_kspace()
       plt.figure()
+
+      for xi, yi in zip(k_adc[0], k_adc[1]):
+          plt.plot([0, xi], [0, yi], 'r')
       plt.title('Estimated K-Space Trajectory')
-      plt.plot(k_adc[0], k_adc[1])
       plt.show()
 
     # ======
@@ -222,4 +225,4 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     #plt.close()
 
 if __name__ == '__main__':
-    main(plot=True, write_seq=True, pns_check=True, test_report=True, sar=True, acoustic_check=True, k_space=True)
+    main(plot=False, write_seq=False, pns_check=False, test_report=False, acoustic_check=False, k_space=True)

@@ -6,9 +6,9 @@ Gy:    300
 Gz:    303
 ADC:    100
 Delay:      0
-Sequence duration: 0.886780 s
-TE: 0.005020 s
-TR: 0.008780 s
+Sequence duration: 1.234220 s
+TE: 0.008020 s
+TR: 0.012220 s
 Flip angle: 90.00 deg
 Unique k-space positions (aka cols, rows, etc.): 6392 6331 
 Dimensions: 2
@@ -16,8 +16,8 @@ Spatial resolution: 7.69 mm
 Spatial resolution: 7.69 mm
 Repetitions/slices/contrasts: 1.0; range: [(np.float64(1.0), np.float64(1.0))]
 Non-cartesian/irregular encoding trajectory detected (eg: EPI, spiral, radial, etc.)
-Max gradient: 800000 799984 2116402 Hz/m == 18.79 18.79 49.71 mT/m
-Max slew rate: 5000000000 4999901304 5426672093 Hz/m/s == 117.44 117.43 127.46 T/m/s
-Max absolute gradient: 2116402 Hz/m == 49.71 mT/m
-Max absolute slew rate: 7.37894e+09 Hz/m/s == 173.31 T/m/s
+Max gradient: 800000 799984 1058201 Hz/m == 18.79 18.79 24.85 mT/m
+Max slew rate: 5000000000 4999901304 5291005291 Hz/m/s == 117.44 117.43 124.27 T/m/s
+Max absolute gradient: 1216466 Hz/m == 28.57 mT/m
+Max absolute slew rate: 7.27974e+09 Hz/m/s == 170.98 T/m/s
 Event timing check passed successfully

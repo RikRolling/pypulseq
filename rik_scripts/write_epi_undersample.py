@@ -1,9 +1,11 @@
 """
-Demo low-performance EPI sequence without ramp-sampling.
+Demo low-performance undersampled EPI sequence without ramp-sampling.
 
 RIK KHOT
 
 Fully Sampled EPI, TR ~ 40ms
+
+Note: unsure that this is actual undersampling
 """
 
 import numpy as np

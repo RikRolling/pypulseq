@@ -4,6 +4,8 @@ Converting writeSpiral.m from matlab to python
 Original author: Maxim Zaitsev
 
 Author for .py: Rik Khot
+
+DOES NOT WORK
 """
 
 import numpy as np
@@ -175,11 +177,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
 
     #Define gradients and adc events
     adc_time = dt_grad*spiral_grad_shape.shape[1]
-    adc_samples_desired = k_radius*k_samples
-    adc_dwell = round(adc_time/(adc_samples_desired*system.adc_raster_time))*system.adc_raster_time
-    adc_samples_desired = np.ceil(adc_time/adc_dwell)
-    adc_segments, adc_samples_per_segment = pp.calc_adc_segments(
-        num_samples=adc_samples_desired,
+    main(plot=True, write_seq=True, pns_check=True, test_report=True, sar=False, acoustic_check=True, k_space=True)
         dwell=adc_dwell,
         system=system
         )
