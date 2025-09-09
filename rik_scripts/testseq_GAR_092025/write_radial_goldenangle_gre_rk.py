@@ -29,7 +29,7 @@ from pypulseq.utils.siemens import readasc as readasc
 from pypulseq.utils.siemens import asc_to_hw as asc_to_hw
 
 
-def main(plot_seq: bool = False, write_seq: bool = False, pns_check: bool = False, test_report: bool = False, acoustic_check: bool = False ,k_space: bool = False, seq_filename: str = 'GAR_N100_TR28e-4.seq'):
+def main(plot_seq: bool = False, write_seq: bool = False, pns_check: bool = False, test_report: bool = False, acoustic_check: bool = False ,k_space: bool = False, seq_filename: str = 'GAR_N100_TR30e-4.seq'):
     # ======
     # SETUP
     # ======
@@ -38,8 +38,8 @@ def main(plot_seq: bool = False, write_seq: bool = False, pns_check: bool = Fals
     Nx = 64  # Define FOV and resolution
     alpha = 90 #10 = initial value # Flip angle
     slice_thickness = 1e-2 #initial val = 3e-3  # Slice thickness #DIMAC EPI slice_thickness = 1e-2
-    TE = 1.8e-3  #7.5 #8e-3 = initial val  # Echo time
-    TR = 2.8e-3 #15 #20e-3 = initial val  # Repetition time
+    TE = 1.9e-3  #7.5 #8e-3 = initial val  # Echo time
+    TR = 3e-3 #15 #20e-3 = initial val  # Repetition time
     Nr = 100 #initial val = 60  # Number of radial spokes
     N_dummy = 0  #20 = initial val # Number of dummy scans
     delta = 111.25*(np.pi/360) # Angular increment
@@ -80,7 +80,7 @@ def main(plot_seq: bool = False, write_seq: bool = False, pns_check: bool = Fals
     deltak = 1 / fov
     gx = pp.make_trapezoid(channel='x', flat_area=Nx * deltak, flat_time=6.4e-3/5, system=system) #flat_time=6.4e-3/5
     adc = pp.make_adc(num_samples=Nx, duration=gx.flat_time, delay=gx.rise_time, system=system)
-    gx_pre = pp.make_trapezoid(channel='x', area=-gx.area / 2 - deltak / 2, duration=8e-4, system=system)
+    gx_pre = pp.make_trapezoid(channel='x', area=-gx.area / 2 - deltak / 2, duration=3e-4, system=system)
     gz_reph = pp.make_trapezoid(channel='z', area=-gz.area / 2, duration=8e-4, system=system)
     # Gradient spoiling
     gx_spoil = pp.make_trapezoid(channel='x', area=0.5 * Nx * deltak, system=system)
@@ -149,7 +149,7 @@ def main(plot_seq: bool = False, write_seq: bool = False, pns_check: bool = Fals
     # ======
     if test_report:
         #user to change text name based on read-out trajectory
-        with open('GAR_N100_TR28e-4.txt', 'w') as file:
+        with open('GAR_N100_TR30e-4.txt', 'w') as file:
             file.write(seq.test_report())
 
     # ======
