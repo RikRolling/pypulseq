@@ -29,28 +29,28 @@ from pypulseq.utils.siemens import readasc as readasc
 from pypulseq.utils.siemens import asc_to_hw as asc_to_hw
 
 
-def main(plot_seq: bool = False, write_seq: bool = False, pns_check: bool = False, test_report: bool = False, acoustic_check: bool = False ,k_space: bool = False, seq_filename: str = 'GAR_N100_TR150e-4.seq'):
+def main(plot_seq: bool = False, write_seq: bool = False, pns_check: bool = False, test_report: bool = False, acoustic_check: bool = False ,k_space: bool = False, seq_filename: str = 'GAR_N800_TR60e-4_cons.seq'):
     # ======
     # SETUP
     # ======
      # FOV for SIEMENS prisma = 125 (3D), 250 (2D)
     fov = 250e-3 # initial val =260e-3
-    Nx = 64  # Define FOV and resolution
+    Nx = 128  # Define FOV and resolution
     alpha = 90 #10 = initial value # Flip angle
-    slice_thickness = 1e-2 #initial val = 3e-3  # Slice thickness #DIMAC EPI slice_thickness = 1e-2
-    TE = 1.5e-3  #7.5 #8e-3 = initial val  # Echo time
-    TR = 15e-3 #15 #20e-3 = initial val  # Repetition time
-    Nr = 100 #initial val = 60  # Number of radial spokes
-    N_dummy = 0  #20 = initial val # Number of dummy scans
+    slice_thickness = 3e-3 #initial val = 3e-3  # Slice thickness #DIMAC EPI slice_thickness = 1e-2
+    TE = 2.9e-3  #7.5 #8e-3 = initial val  # Echo time
+    TR = 6e-3 #15 #20e-3 = initial val  # Repetition time
+    Nr = 800 #initial val = 60  # Number of radial spokes
+    N_dummy = 20  #20 = initial val # Number of dummy scans
     delta = 111.25*(np.pi/360) # Angular increment
 
     rf_spoiling_inc = 117  # RF spoiling increment
 
     # Set 3T Siemens PRISMA system limits
     system = pp.Opts(
-        max_grad=80, #initial val = 28, 80
+        max_grad=60, #initial val = 28, 80
         grad_unit='mT/m',
-        max_slew=200,#120, 200
+        max_slew=150,#120, 200
         slew_unit='T/m/s',
         rf_ringdown_time=20e-6,
         rf_dead_time=100e-6,
@@ -66,7 +66,7 @@ def main(plot_seq: bool = False, write_seq: bool = False, pns_check: bool = Fals
     # Create alpha-degree slice selection pulse and gradient
     rf, gz, _ = pp.make_sinc_pulse(
         apodization=0.5,
-        duration=7e-4,
+        duration=2e-3,
         flip_angle=alpha * np.pi / 180,
         slice_thickness=slice_thickness,
         system=system,
@@ -80,8 +80,8 @@ def main(plot_seq: bool = False, write_seq: bool = False, pns_check: bool = Fals
     deltak = 1 / fov
     gx = pp.make_trapezoid(channel='x', flat_area=Nx * deltak, flat_time=6.4e-3/5, system=system) #flat_time=6.4e-3/5
     adc = pp.make_adc(num_samples=Nx, duration=gx.flat_time, delay=gx.rise_time, system=system)
-    gx_pre = pp.make_trapezoid(channel='x', area=-gx.area / 2 - deltak / 2, duration=4e-4, system=system)
-    gz_reph = pp.make_trapezoid(channel='z', area=-gz.area / 2, duration=4e-4, system=system)
+    gx_pre = pp.make_trapezoid(channel='x', area=-gx.area / 2 - deltak / 2, duration=8e-4, system=system)
+    gz_reph = pp.make_trapezoid(channel='z', area=-gz.area / 2, duration=7.8e-4, system=system)
     # Gradient spoiling
     gx_spoil = pp.make_trapezoid(channel='x', area=0.5 * Nx * deltak, system=system)
     gz_spoil = pp.make_trapezoid(channel='z', area=4 / slice_thickness, system=system)
@@ -149,7 +149,7 @@ def main(plot_seq: bool = False, write_seq: bool = False, pns_check: bool = Fals
     # ======
     if test_report:
         #user to change text name based on read-out trajectory
-        with open('GAR_N100_TR150e-4.txt', 'w') as file:
+        with open('GAR_N800_TR60e-4_cons.txt', 'w') as file:
             file.write(seq.test_report())
 
     # ======
@@ -158,11 +158,50 @@ def main(plot_seq: bool = False, write_seq: bool = False, pns_check: bool = Fals
     if acoustic_check:
         asc, extra = readasc.readasc('combined_copy.asc')
         list = asc_to_hw.asc_to_acoustic_resonances(asc)
-        seq.calculate_gradient_spectrum(
+        spectogram, spectogram_sos, f, t = seq.calculate_gradient_spectrum(
             acoustic_resonances=list,
             combine_mode='max',
             plot=True
          )
+
+        seq.calculate_gradient_spectrum(
+        acoustic_resonances=list,
+        combine_mode='max',
+        plot=True
+     )
+
+    print("Spectrogram shape:", spectogram_sos.shape)
+    print("Frequency array shape:", f.shape)
+
+    # --- Step 2: Filter by resonance bands ---
+    bands = [(490, 690), (940, 1360)]
+    mask = np.zeros_like(f, dtype=bool)
+    for low, high in bands:
+        mask |= (f >= low) & (f <= high)
+
+    # --- Step 3: Compute total and filtered integrals ---
+    # Assuming spectrogram_sos is 1D (same length as f)
+    if spectogram_sos.ndim == 1:
+        total_integral = np.trapz(spectogram_sos, f)
+        filtered_integral = np.trapz(spectogram_sos[mask], f[mask])
+    else:
+        # If spectrogram_sos is 2D (e.g., time × frequency)
+        total_integral = np.trapz(np.trapz(spectogram_sos, f, axis=1), dx=1)
+        filtered_integral = np.trapz(np.trapz(spectogram_sos[:, mask], f[mask], axis=1), dx=1)
+
+    # --- Step 4: Compute ratio ---
+    percent_filtered = (filtered_integral / total_integral) * 100
+
+    print(f"Total spectrogram integral: {total_integral:.4f}")
+    print(f"Filtered spectrogram integral: {filtered_integral:.4f}")
+    print(f"Mechanical resonance ratio: {percent_filtered:.2f}%")
+
+    # Optional: store filtered subset if you want
+    filtered_data = np.vstack([f[mask], spectogram_sos[mask]]).T
+
+
+
+
     # ========
     # SAR CHECKER
     # ========
@@ -226,4 +265,4 @@ def main(plot_seq: bool = False, write_seq: bool = False, pns_check: bool = Fals
     #plt.close()
 
 if __name__ == '__main__':
-    main(plot_seq=True, write_seq=True, pns_check=True, test_report=True, acoustic_check=True, k_space=True)
+    main(plot_seq=False, write_seq=False, pns_check=False, test_report=False, acoustic_check=True, k_space=False)
