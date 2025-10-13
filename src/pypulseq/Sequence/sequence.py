@@ -245,14 +245,13 @@ class Sequence:
             Frequency axis of the spectrograms.
         times : np.ndarray
             Time axis of the spectrograms (only relevant when combine_mode == 'none').
-        
-    
+
+
 
         """
         if acoustic_resonances is None:
             acoustic_resonances = []
 
-        return calculate_gradient_spectrum(
             self,
             max_frequency=max_frequency,
             window_width=window_width,
@@ -920,8 +919,8 @@ class Sequence:
         if grad_disp not in valid_grad_units:
             raise ValueError('Unsupported gradient unit. Supported gradient units are: ' + str(valid_grad_units))
 
-        
-        
+
+
         fig1, fig2 = plt.figure(), plt.figure()
         sp11 = fig1.add_subplot(311)
         sp12 = fig1.add_subplot(312, sharex=sp11)
@@ -1066,24 +1065,24 @@ class Sequence:
         # Setting display limits
         disp_range = t_factor * np.array([time_range[0], min(t0, time_range[1])])
         [x.set_xlim(disp_range) for x in [sp11, sp12, sp13, *fig2_subplots]]
-        
-        
-        
-    
-    
+
+
+
+
+
         # Grid on
         for sp in [sp11, sp12, sp13, *fig2_subplots]:
             sp.grid()
 
         fig1.tight_layout()
         fig2.tight_layout()
-        
+
         if save:
             fig1.savefig('seq_plot1.jpg')
             fig2.savefig('seq_plot2.jpg')
 
         if plot_now:
-        
+
             plt.show()
 
     def read(self, file_path: str, detect_rf_use: bool = False, remove_duplicates: bool = True) -> None:
