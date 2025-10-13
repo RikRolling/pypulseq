@@ -24,7 +24,7 @@ from pypulseq.utils.siemens import asc_to_hw as asc_to_hw
 
 
 seq = pp.Sequence()
-seq.read('/Users/ritkakhot/GitHub/rik_scripts/testseq_GAR_092025/GAR_N100_TR40e-4/GAR_N100_TR40e-4.seq')
+seq.read('Users/ritkakhot/GitHub/rik_scripts/testseq_GAR_092025/GAR_N800_TR40e-4.seq')
 
 asc, extra = readasc.readasc('combined_copy.asc')
 list = asc_to_hw.asc_to_acoustic_resonances(asc)
