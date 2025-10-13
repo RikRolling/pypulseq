@@ -881,6 +881,8 @@ class Sequence:
         time_disp: str = 's',
         grad_disp: str = 'kHz/m',
         plot_now: bool = True,
+        fig1_name: str = str(),
+        fig2_name: str = str(),
     ) -> None:
         """
         Plot `Sequence`.
@@ -1079,8 +1081,8 @@ class Sequence:
         fig2.tight_layout()
         
         if save:
-            fig1.savefig('seq_plot1.jpg')
-            fig2.savefig('seq_plot2.jpg')
+            fig1.savefig(fig1_name + '.jpg')
+            fig2.savefig(fig2_name + '.jpg')
 
         if plot_now:
         
