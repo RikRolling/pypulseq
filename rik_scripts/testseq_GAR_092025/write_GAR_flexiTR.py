@@ -29,7 +29,7 @@ from pypulseq.utils.siemens import readasc as readasc
 from pypulseq.utils.siemens import asc_to_hw as asc_to_hw
 
 
-def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, test_report: bool = False, acoustic_check: bool = False ,k_space: bool = False, seq_filename: str = 'GAR_N800_TR40e-4.seq'):
+def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, test_report: bool = False, acoustic_check: bool = False ,k_space: bool = False, seq_filename: str = 'GAR_N800_TR20e-4.seq'):
     # ======
     # SETUP
     # ======
@@ -37,8 +37,8 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     fov = 250e-3 # initial val =260e-3
     Nx = 128  # Define FOV and resolution
     alpha = 90 #10 = initial value # Flip angle
-    slice_thickness = 1e-3 #initial val = 3e-3  # Slice thickness
-    TE = 2.2e-3  #7.5 #8e-3 = initial val  # Echo time
+    slice_thickness = 3e-3 #initial val = 3e-3  # Slice thickness
+    TE = 3.6e-3  #7.5 #8e-3 = initial val  # Echo time
     TR = 4e-3 #15 #20e-3 = initial val  # Repetition time
     Nr = 800 #initial val = 60  # Number of radial spokes
     N_dummy = 0  #20 = initial val # Number of dummy scans
@@ -48,9 +48,9 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
 
     # Set 3T Siemens PRISMA system limits
     system = pp.Opts(
-        max_grad=80, #initial val = 28
+        max_grad=25, #initial val = 28
         grad_unit='mT/m',
-        max_slew=200,#120
+        max_slew=190,#120
         slew_unit='T/m/s',
         # Currently do not have access to these values (27/05/25)
         rf_ringdown_time=20e-6,
@@ -66,7 +66,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     # Create alpha-degree slice selection pulse and gradient
     rf, gz, _ = pp.make_sinc_pulse(
         apodization=0.5,
-        duration=3e-3,
+        duration=4e-3,
         flip_angle=alpha * np.pi / 180,
         slice_thickness=slice_thickness,
         system=system,
@@ -80,13 +80,15 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     deltak = 1 / fov
     gx = pp.make_trapezoid(channel='x', flat_area=Nx * deltak, flat_time=6.4e-3 / 5, system=system)
     adc = pp.make_adc(num_samples=Nx, duration=gx.flat_time, delay=gx.rise_time, system=system)
-    gx_pre = pp.make_trapezoid(channel='x', area=-gx.area / 2 - deltak / 2, duration=0.3e-3, system=system)
-    gz_reph = pp.make_trapezoid(channel='z', area=-gz.area / 2, duration=1.2e-3, system=system)
+    gx_pre = pp.make_trapezoid(channel='x', area=-gx.area / 2 - deltak / 2, duration=0.84e-3, system=system)
+    gz_reph = pp.make_trapezoid(channel='z', area=-gz.area / 2, duration=0.84e-3, system=system)
     # Gradient spoiling
     gx_spoil = pp.make_trapezoid(channel='x', area=0.5 * Nx * deltak, system=system)
     gz_spoil = pp.make_trapezoid(channel='z', area=4 / slice_thickness, system=system)
 
     # Calculate timing
+
+    TE_min = pp.calc_duration(gx_pre) - gz.fall_time - gz.flat_time /2 - pp.calc_duration(gx) / 2
     delay_TE = (
         np.ceil(
             (TE - pp.calc_duration(gx_pre) - gz.fall_time - gz.flat_time / 2 - pp.calc_duration(gx) / 2)
@@ -149,7 +151,7 @@ def main(plot: bool = False, write_seq: bool = False, pns_check: bool = False, t
     # ======
     if test_report:
         #user to change text name based on read-out trajectory
-        with open('GAR_N800_TR40e-4.txt', 'w') as file:
+        with open('GAR_N800_TR20e-4.txt', 'w') as file:
             file.write(seq.test_report())
 
     # ======
