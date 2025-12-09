@@ -14,6 +14,8 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 
+from scipy import integrate
+
 from pypulseq.SAR.SAR_calc import _SAR_from_seq as SAR
 
 from pypulseq.SAR.SAR_calc import _load_Q
@@ -24,21 +26,18 @@ from pypulseq.utils.siemens import asc_to_hw as asc_to_hw
 
 
 seq = pp.Sequence()
-seq.read('Users/ritkakhot/GitHub/rik_scripts/testseq_GAR_092025/GAR_N800_TR40e-4.seq')
+seq.read('/cubric/data/c24073803/pypulseq_repo/pypulseq/rik_scripts/testseq_GAR_092025/GAR_N100_TR40e-4/GAR_N100_TR40e-4.seq')
 
 asc, extra = readasc.readasc('combined_copy.asc')
 list = asc_to_hw.asc_to_acoustic_resonances(asc)
+#Note: Change in windowing affects the percentage result
 spectogram, spectogram_sos, f, t = seq.calculate_gradient_spectrum(
+    window_width=0.0016,
     acoustic_resonances=list,
     combine_mode='max',
     plot=True
      )
 
-seq.calculate_gradient_spectrum(
-acoustic_resonances=list,
-combine_mode='max',
-plot=True
- )
 
 print("Spectrogram shape:", spectogram_sos.shape)
 print("Frequency array shape:", f.shape)
@@ -53,12 +52,12 @@ for low, high in bands:
 # --- Step 3: Compute total and filtered integrals ---
 # Assuming spectrogram_sos is 1D (same length as f)
 if spectogram_sos.ndim == 1:
-    total_integral = np.trapz(spectogram_sos, f)
-    filtered_integral = np.trapz(spectogram_sos[mask], f[mask])
-else:
+    total_integral = integrate.trapezoid(spectogram_sos, f)
+    filtered_integral = integrate.trapezoid(spectogram_sos[mask], f[mask])
+# else:
 # If spectrogram_sos is 2D (e.g., time × frequency)
-    total_integral = np.trapz(np.trapz(spectogram_sos, f, axis=1), dx=1)
-    filtered_integral = np.trapz(np.trapz(spectogram_sos[:, mask], f[mask], axis=1), dx=1)
+   #  total_integral = integrate.trapezoid(np.trapz(spectogram_sos, f, axis=1), dx=1)
+   #  filtered_integral = integrate.trapezoid(np.trapz(spectogram_sos[:, mask], f[mask], axis=1), dx=1)
 
 # --- Step 4: Compute ratio ---
 percent_filtered = (filtered_integral / total_integral) * 100

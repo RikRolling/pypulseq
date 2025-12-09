@@ -1,9 +1,10 @@
 import numpy as np
 
 import pypulseq as pp
+import matplotlib.pyplot as plt
 
 
-def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_radial_orig.seq'):
+def main(plot: bool = False, write_seq: bool = False, k_space: bool = True, seq_filename: str = 'gre_radial_orig.seq'):
     # ======
     # SETUP
     # ======
@@ -13,8 +14,8 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_r
     slice_thickness = 3e-3  # Slice thickness
     TE = 8e-3  # Echo time
     TR = 20e-3  # Repetition time
-    Nr = 60  # Number of radial spokes
-    N_dummy = 20  # Number of dummy scans
+    Nr = 100  # Number of radial spokes
+    N_dummy = 0  # Number of dummy scans
     delta = np.pi / Nr  # Angular increment
 
     rf_spoiling_inc = 117  # RF spoiling increment
@@ -103,6 +104,19 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_r
         print('Timing check failed! Error listing follows:')
         print(error_report)
 
+     # ======
+    # K-SPACE VISUALIZATION
+    # ======
+    if k_space:
+
+      k_adc, k_all, t_excite, t_refocus, t_adc = seq.calculate_kspace()
+      print(k_adc.shape)
+      plt.figure()
+
+      for xi, yi in zip(k_adc[0], k_adc[1]):
+          plt.plot([0, xi], [0, yi], 'r')
+      plt.title('Estimated K-Space Trajectory')
+      plt.show()
     # ======
     # VISUALIZATION
     # ======
@@ -118,7 +132,7 @@ def main(plot: bool = False, write_seq: bool = False, seq_filename: str = 'gre_r
         seq.write(seq_filename)
 
     return seq
-
+   
 
 if __name__ == '__main__':
-    main(plot=True, write_seq=True)
+    main(plot=False, write_seq=False, k_space=True)

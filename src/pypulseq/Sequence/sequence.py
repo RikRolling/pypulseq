@@ -190,7 +190,7 @@ class Sequence:
     def calculate_gradient_spectrum(
         self,
         max_frequency: float = 2000,
-        window_width: float = 0.05,
+        window_width: float = 0.0016,
         frequency_oversampling: float = 3,
         time_range: Union[List[float], None] = None,
         plot: bool = True,
@@ -261,8 +261,7 @@ class Sequence:
             combine_mode=combine_mode,
             use_derivative=use_derivative,
             acoustic_resonances=acoustic_resonances,
-        )
-
+        
     def calculate_kspace(
         self,
         trajectory_delay: Union[float, List[float], np.ndarray] = 0,

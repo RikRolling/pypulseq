@@ -1,0 +1,23 @@
+Number of blocks: 20
+Number of events:
+RF:      4
+Gx:     12
+Gy:      9
+Gz:     12
+ADC:      3
+Delay:      0
+Sequence duration: 0.060000 s
+TE: 0.010005 s
+TR: 0.015000 s
+Flip angle: 90.00 deg
+Unique k-space positions (aka cols, rows, etc.): 382 255 
+Dimensions: 2
+Spatial resolution: 1.95 mm
+Spatial resolution: 2.10 mm
+Repetitions/slices/contrasts: 1.0; range: [(np.float64(1.0), np.float64(3.0))]
+Non-cartesian/irregular encoding trajectory detected (eg: EPI, spiral, radial, etc.)
+Max gradient: 1422222 1325522 3389831 Hz/m == 33.40 31.13 79.62 mT/m
+Max slew rate: 8000000000 7456062954 8474576271 Hz/m/s == 187.90 175.12 199.05 T/m/s
+Max absolute gradient: 3389831 Hz/m == 79.62 mT/m
+Max absolute slew rate: 1.15865e+10 Hz/m/s == 272.14 T/m/s
+Event timing check passed successfully
