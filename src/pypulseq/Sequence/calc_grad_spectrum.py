@@ -167,7 +167,7 @@ def calculate_gradient_spectrum(
                     extent=(times[0], times[-1], frequencies[0], frequencies[-1]),
                     aspect=(times[-1] - times[0]) / (frequencies[-1] - frequencies[0]),
                 )
-                #plt.savefig('test1')
+                plt.savefig('test1')
 
                 for res in acoustic_resonances:
                     plt.axhline(res['frequency'], color='r', linestyle='-')
@@ -183,7 +183,7 @@ def calculate_gradient_spectrum(
                 extent=(times[0], times[-1], frequencies[0], frequencies[-1]),
                 aspect=(times[-1] - times[0]) / (frequencies[-1] - frequencies[0]),
             )
-            #plt.savefig('test2')
+            plt.savefig('test2')
 
             for res in acoustic_resonances:
                 plt.axhline(res['frequency'], color='r', linestyle='-')

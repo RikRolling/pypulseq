@@ -39,11 +39,10 @@ asc, extra = readasc.readasc('/cubric/data/c24073803/pypulseq_repo/pypulseq/rik_
 mech_res = asc_to_hw.asc_to_acoustic_resonances(asc)
 print('mechanical resonances:', mech_res)
 
-spectogram, spectogram_sos, f, t = seq.calculate_gradient_spectrum(
-    window_width=0.1,
+seq.calculate_gradient_spectrum(
+    window_width=0.5,
     acoustic_resonances=mech_res,
-    combine_mode='max',
-    plot=True
+    combine_mode='max'
      )
 
-
+plt.show()
