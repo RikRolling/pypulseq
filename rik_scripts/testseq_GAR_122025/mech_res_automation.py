@@ -28,6 +28,7 @@ from pypulseq.utils.siemens import readasc as readasc
 from pypulseq.utils.siemens import asc_to_hw as asc_to_hw
 
 
+#Load in sequence and mechanical resonance information
 seq = pp.Sequence()
 seq.read('/path/to/sequence')
 
