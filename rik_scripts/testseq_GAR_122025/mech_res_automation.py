@@ -28,16 +28,19 @@ from pypulseq.utils.siemens import readasc as readasc
 from pypulseq.utils.siemens import asc_to_hw as asc_to_hw
 
 
-#Load in sequence and mechanical resonance information
+# Create sequence object
 seq = pp.Sequence()
-seq.read('/path/to/sequence')
 
-asc, extra = readasc.readasc('/path/to/combined_copy.asc')
+# User enters file path to sequence and scanner specific asc file
+seq.read('/cubric/data/c24073803/pypulseq_repo/pypulseq/rik_scripts/testseq_GAR_092025/GAR_N100_TR40e-4_cons/GAR_N100_TR40e-4_cons.seq')
+asc, extra = readasc.readasc('/cubric/data/c24073803/pypulseq_repo/pypulseq/rik_scripts/combined_copy.asc')
+
+
 mech_res = asc_to_hw.asc_to_acoustic_resonances(asc)
 print('mechanical resonances:', mech_res)
 
 spectogram, spectogram_sos, f, t = seq.calculate_gradient_spectrum(
-    window_width=0.0016,
+    window_width=0.1,
     acoustic_resonances=mech_res,
     combine_mode='max',
     plot=True
