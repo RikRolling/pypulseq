@@ -39,10 +39,33 @@ asc, extra = readasc.readasc('/cubric/data/c24073803/pypulseq_repo/pypulseq/rik_
 mech_res = asc_to_hw.asc_to_acoustic_resonances(asc)
 print('mechanical resonances:', mech_res)
 
-seq.calculate_gradient_spectrum(
+mech_res_1 = mech_res[0]
+mech_res_2 = mech_res[1]
+
+f1_res = mech_res_1['frequency']
+f1_bwth = mech_res_1['bandwidth']
+
+f2_res = mech_res_2['frequency']
+f2_bwth = mech_res_2['bandwidth']
+
+print('mech res 1',f1_res, '+/-', f1_bwth/2)
+print('mech res 2',f2_res, '+/-', f2_bwth/2)
+
+spectogram,spectogram_rss, f, t = seq.calculate_gradient_spectrum(
     window_width=0.5,
     acoustic_resonances=mech_res,
-    combine_mode='max'
+    combine_mode='max',
+    plot=True
      )
 
 plt.show()
+
+# Define Mask
+lb1 = f1_res - f1_bwth/2
+ub1 = f1_res + f1_bwth/2
+lb2 = f2_res - f2_bwth/2
+ub2 = f2_res + f2_bwth/2
+
+
+#if lb1 <= f <= ub1 or lb2 <= f <= ub2:
+
