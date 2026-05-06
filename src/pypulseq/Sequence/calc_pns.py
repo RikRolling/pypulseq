@@ -85,12 +85,19 @@ def calc_pns(
 
     # calc pns_norm and the final ok/not_ok
     pns_norm = np.sqrt((pns_comp**2).sum(axis=1))
-    ok = all(pns_norm < 1)
 
+    # =======
+    # @rikrolling
+    # =======
+
+    # Relative stimulation percentage (as quoted on Figure title)
+
+    ok = all(pns_norm < 1)
+    rel_stim = max(pns_norm)
     # ready
     if do_plots:
         # plot results
         plt.figure()
         safe_plot(pns_comp * 100, obj.grad_raster_time)
 
-    return ok, pns_norm, pns_comp, t
+    return ok, pns_norm, pns_comp, t, rel_stim

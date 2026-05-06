@@ -203,6 +203,26 @@ def ext_test_report_data(self) -> Dict[str, Any]:
     ga_abs_converted = convert(from_value=ga_abs, from_unit='Hz/m', to_unit='mT/m', gamma=self.system.gamma)
     gs_abs_converted = convert(from_value=gs_abs, from_unit='Hz/m/s', to_unit='T/m/s', gamma=self.system.gamma)
 
+    # =======
+    # @rikrolling Additions
+    # =======
+
+    # Readout Bandwidth
+    if 'Nx' in self.definitions:
+        Nx = self.definitions['Nx']
+        adc_dwell = abs(t_adc[0] - t_adc[1])
+        ro_bw = 1/(adc_dwell*Nx)
+
+    # Mechanical Resonances
+    # Gives percentage area of frequency spectrum within mechanical resonances of scanner
+    if 'mech_res' in self.definitions:
+            mech_res = self.definitions['mech_res']
+
+    # PNS
+    if 'pns' in self.definitions:
+        pns = self.definitions['pns']
+        
+
     # Build the result dictionary
     data: Dict[str, Any] = {
         'num_blocks': num_blocks,
@@ -217,6 +237,8 @@ def ext_test_report_data(self) -> Dict[str, Any]:
         'duration': duration,
         'TE': TE,
         'TR': TR,
+        # @rikrolling addition
+        'Readout_Bandwidth': ro_bw,
         'flip_angles_deg': list(flip_angles_deg),
         'unique_k_positions': unique_k_positions,
         'max_gradient': {
@@ -233,6 +255,8 @@ def ext_test_report_data(self) -> Dict[str, Any]:
         },
         'timing_ok': timing_ok,
         'timing_error_report': timing_error_report,
+        'Mechanical_Resonances_Percentage': mech_res,
+        'PNS': pns,
     }
 
     # Add optional fields if there are multiple k-space positions
@@ -270,6 +294,9 @@ def ext_test_report_str(data: Dict[str, Any]) -> str:
     ga_converted = data['max_gradient']['per_channel_mT_m']
     gs = data['max_slew_rate']['per_channel_Hz_m_s']
     gs_converted = data['max_slew_rate']['per_channel_T_m_s']
+    ro_bw = data['Readout_Bandwidth']
+    mech_res = data['Mechanical_Resonances_Percentage']
+    pns = data['PNS']
 
     report = (
         f'Number of blocks: {data["num_blocks"]}\n'
@@ -284,6 +311,16 @@ def ext_test_report_str(data: Dict[str, Any]) -> str:
         f'TE: {data["TE"]:.6f} s\n'
         f'TR: {data["TR"]:.6f} s\n'
     )
+
+    # =======
+    # @rikrolling Additions
+    # =======
+
+    report += ('Readout Bandwidth: {:.6f} Hz\n').format(ro_bw)
+    report += f'Mechanical Resonances Percentage: {mech_res:.2f}%\n'
+    report += f'PNS (relative stimulation): {pns:.2f}%\n'
+
+
     report += 'Flip angle: ' + ('{:.02f} ' * len(flip_angles_deg)).format(*flip_angles_deg) + 'deg\n'
     report += (
         'Unique k-space positions (aka cols, rows, etc.): '
