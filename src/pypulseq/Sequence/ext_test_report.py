@@ -215,12 +215,12 @@ def ext_test_report_data(self) -> Dict[str, Any]:
 
     # Mechanical Resonances
     # Gives percentage area of frequency spectrum within mechanical resonances of scanner
-    if 'mech_res' in self.definitions:
-            mech_res = self.definitions['mech_res']
+    #if 'mech_res_3TE' in self.definitions:
+           # mech_res = self.definitions['mech_res']
 
     # PNS
-    if 'pns' in self.definitions:
-        pns = self.definitions['pns']
+    #if 'pns' in self.definitions:
+        #pns = self.definitions['pns']
         
 
     # Build the result dictionary
@@ -255,8 +255,8 @@ def ext_test_report_data(self) -> Dict[str, Any]:
         },
         'timing_ok': timing_ok,
         'timing_error_report': timing_error_report,
-        'Mechanical_Resonances_Percentage': mech_res,
-        'PNS': pns,
+        #'Mechanical_Resonances_Percentage': mech_res,
+        #'PNS': pns,
     }
 
     # Add optional fields if there are multiple k-space positions
@@ -317,8 +317,8 @@ def ext_test_report_str(data: Dict[str, Any]) -> str:
     # =======
 
     report += ('Readout Bandwidth: {:.6f} Hz\n').format(ro_bw)
-    report += f'Mechanical Resonances Percentage: {mech_res:.2f}%\n'
-    report += f'PNS (relative stimulation): {pns:.2f}%\n'
+    #report += f'Mechanical Resonances Percentage: {mech_res:.2f}%\n'
+    #report += f'PNS (relative stimulation): {pns:.2f}%\n'
 
 
     report += 'Flip angle: ' + ('{:.02f} ' * len(flip_angles_deg)).format(*flip_angles_deg) + 'deg\n'
