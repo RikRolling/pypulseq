@@ -295,8 +295,7 @@ def ext_test_report_str(data: Dict[str, Any]) -> str:
     gs = data['max_slew_rate']['per_channel_Hz_m_s']
     gs_converted = data['max_slew_rate']['per_channel_T_m_s']
     ro_bw = data['Readout_Bandwidth']
-    mech_res = data['Mechanical_Resonances_Percentage']
-    pns = data['PNS']
+
 
     report = (
         f'Number of blocks: {data["num_blocks"]}\n'
